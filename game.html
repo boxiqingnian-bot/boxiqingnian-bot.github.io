@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字门大冒险</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg,#16215c,#0a1128); color: #eaf2ff; text-align: center; padding: 20px 14px 26px; min-height: 100vh; }
+  h1 { font-size: 34px; letter-spacing: 2px; margin-bottom: 6px; }
+  h1 .accent { color: #ffd43b; }
+  .sub { color: #a8b2d8; font-size: 14.5px; line-height: 1.7; margin: 0 auto 12px; max-width: 520px; }
+  .hud { display: flex; gap: 10px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .hud div { background: #232946; border: 2px solid #3d4470; padding: 7px 18px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .hud .power { background: #2b5ea7; border-color: #2b5ea7; font-size: 17px; }
+  canvas { background: linear-gradient(#131f3d, #0a1122); border: 3px solid #3d4470; border-radius: 18px; max-width: 100%; touch-action: none; box-shadow: 0 12px 34px rgba(0,0,0,.55); }
+  .btn { font-size: 18px; font-weight: 800; padding: 13px 46px; border: none; border-radius: 999px; background: linear-gradient(180deg,#ff8a5c,#e8590c); color: #fff; cursor: pointer; margin-top: 14px; box-shadow: 0 5px 16px rgba(232,89,12,.45); }
+  .msg { min-height: 26px; margin-top: 12px; font-size: 18px; font-weight: 800; color: #ffd43b; }
+  .bar { width: 480px; max-width: 100%; height: 9px; background: #232946; border-radius: 5px; margin: 10px auto 0; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: #51cf66; }
+</style>
+</head>
+<body>
+<h1>🚀 数字门<span class="accent">大冒险</span></h1>
+<p class="sub">左右移动小队，对准数字怪开火！穿过<b>运算门</b>变强：人数少时选 ＋，人数多时选 ×。怪冲过防线会按它剩下的血扣你的人数——撑到终点就赢啦。</p>
+<div class="hud">
+  <div class="power">👥 人数 <span id="power">3</span></div>
+  <div>🔫 激光 <span id="streams">1</span> 条</div>
+  <div>💥 击破 <span id="kills">0</span></div>
+  <div>⏱ 时间 <span id="time">0</span> / 90 秒</div>
+</div>
+<canvas id="cv" width="480" height="620"></canvas>
+<div class="bar"><i id="prog"></i></div>
+<div class="msg" id="msg">点「开始游戏」出发！</div>
+<button class="btn" id="btn">开始游戏</button>
+
+<script>
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+const W = cv.width, H = cv.height;
+const PLAYER_Y = H - 84, GAME_LEN = 90, POWER_CAP = 999999;
+function fmt(n) { return n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(n); }
+
+// ===== 火力规则（引擎锁定）：人数越多，激光条数与单发伤害越高，条数封顶 7 条 =====
+function streamsOf(p) { return Math.min(7, 1 + Math.floor(p / 15)); }
+function dmgOf(p) { return 1 + Math.floor(p / 90); } // 伤害增速放缓，防后期火力与血量一起失控
+function dpsOf(p) { return streamsOf(p) * dmgOf(p) / 0.12; } // 每秒总伤害
+
+// 关卡剧本：gate = 一对闸门（左/右各一个运算）；enemy 的 secs = 这只怪按你当前火力要打几秒
+// （血量在生成瞬间按当前火力换算，所以人数涨多快，怪的血就跟着涨多少，永远是同一个数量级）
+const SCRIPT = [
+  { type: "gate", left: ["+", 5], right: ["×", 2], wait: 900 },
+  { type: "enemy", hp: 14, wait: 2400 },
+  { type: "enemy", hp: 16, wait: 2600 },
+  { type: "gate", left: ["+", 6], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 36, wait: 2600 },
+  { type: "gate", left: ["×", 2], right: ["-", 4], wait: 1500 },
+  { type: "enemy", hp: 57, wait: 2800 },
+  { type: "gate", left: ["+", 12], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 103, wait: 2800 },
+  { type: "gate", left: ["÷", 2], right: ["+", 18], wait: 1500 },
+  { type: "enemy", hp: 131, wait: 3000 },
+  { type: "gate", left: ["×", 3], right: ["+", 25], wait: 1500 },
+  { type: "enemy", hp: 482, wait: 3000 },
+  { type: "gate", left: ["+", 40], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 930, wait: 3200 },
+  { type: "gate", left: ["-", 15], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 1760, wait: 3200 },
+  { type: "gate", left: ["×", 2], right: ["+", 80], wait: 1500 },
+  { type: "enemy", hp: 3680, wait: 3400 },
+  { type: "gate", left: ["+", 150], right: ["×", 2], wait: 1500 },
+  // —— 第二幕（不再循环复用第一幕：人数是指数涨的，旧剧本转圈用必然数值脱节）——
+  { type: "gate", left: ["+", 800], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 13400, wait: 3000 },
+  { type: "enemy", hp: 14100, wait: 3200 },
+  { type: "gate", left: ["×", 2], right: ["-", 500], wait: 1500 },
+  { type: "enemy", hp: 28300, wait: 3200 },
+  { type: "gate", left: ["+", 3000], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 58200, wait: 3200 },
+  { type: "gate", left: ["÷", 2], right: ["+", 6000], wait: 1500 },
+  { type: "enemy", hp: 69300, wait: 3400 },
+  { type: "gate", left: ["×", 3], right: ["+", 9000], wait: 1500 },
+  { type: "enemy", hp: 214700, wait: 3400 },
+  { type: "gate", left: ["-", 5000], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 429500, wait: 3400 },
+  { type: "gate", left: ["+", 20000], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 858800, wait: 3400 },
+  { type: "gate", left: ["×", 2], right: ["-", 20000], wait: 1500 },
+  { type: "enemy", hp: 1717300, wait: 3400 },
+  { type: "gate", left: ["+", 50000], right: ["×", 2], wait: 1500 },
+  { type: "enemy", hp: 1909000, wait: 3400 },
+  { type: "gate", left: ["×", 2], right: ["+", 99999], wait: 1500 },
+];
+
+let power = 3, kills = 0, running = false, raf = null;
+let px = W / 2, targetX = W / 2;
+let bullets = [], enemies = [], gates = [], floats = [];
+let startTime = 0, stepIdx = 0, nextStepAt = 0, lastShot = 0, cycle = 0, lastFrame = 0;
+
+function applyOp(p, op) {
+  let r = p;
+  if (op[0] === "+") r = p + op[1];
+  if (op[0] === "-") r = p - op[1];
+  if (op[0] === "×") r = p * op[1];
+  if (op[0] === "÷") r = Math.floor(p / op[1]);
+  return Math.max(0, Math.min(POWER_CAP, r));
+}
+function opLabel(op) { return op[0] + op[1]; }
+function opGood(op, p) { return applyOp(p, op) >= p; }
+
+function spawnStep(now) {
+  const s = SCRIPT[stepIdx % SCRIPT.length];
+  if (stepIdx > 0 && stepIdx % SCRIPT.length === 0) cycle++;
+  if (s.type === "gate") {
+    gates.push({ y: -52, left: s.left, right: s.right, applied: false });
+  } else {
+    const side = Math.random() < 0.5 ? "L" : "R";
+    const center = side === "L" ? W / 4 : W * 3 / 4;
+    const ex = center + (Math.random() * 90 - 45);
+    enemies.push({
+      x: ex, y: -60, w: 92, h: 56,
+      // 绝对血量：按"每道门都选对时、此处的火力"标定，只需要约六成窗口就能打完（游刃有余）；
+      // 选错门的人火力低一大截，同一只怪全程打满也打不完、必漏——区分度来自选门，不来自手速
+      hp: s.hp,
+      side, flash: 0, resolved: false,
+    });
+  }
+  nextStepAt = now + s.wait;
+  stepIdx++;
+}
+
+function loop(now) {
+  if (!running) return;
+  // 全部移动按真实时间（秒）算，不按帧算——否则高刷新率屏幕上怪速翻倍、火力却不变，数值全乱
+  const dt = Math.min(0.05, lastFrame ? (now - lastFrame) / 1000 : 1 / 60);
+  lastFrame = now;
+  const elapsed = (now - startTime) / 1000;
+  document.getElementById("time").textContent = Math.floor(elapsed);
+  document.getElementById("prog").style.width = Math.min(100, elapsed / GAME_LEN * 100) + "%";
+  document.getElementById("streams").textContent = streamsOf(power);
+  if (elapsed >= GAME_LEN) return finish(true);
+  if (now >= nextStepAt) {
+    const s = SCRIPT[stepIdx % SCRIPT.length];
+    // 出场纪律（双向）：有未结算的闸门时不出怪，场上有怪时不出门——门和怪永远不抢同一段时间；
+    // 前 32 秒场上至多一只怪，之后才允许怪与怪重叠（门始终单独出场）
+    const gatePending = gates.some(g => !g.applied);
+    const enemyBlocked = s.type === "enemy" && (gatePending || (elapsed < 32 && enemies.length > 0));
+    const gateBlocked = s.type === "gate" && (enemies.length > 0 || gatePending); // 门也不许叠门
+    if (!enemyBlocked && !gateBlocked) spawnStep(now);
+  }
+  const scroll = 117 * dt; // 怪速 117 像素/秒：战斗窗口约 4.75 秒，与血量标定绑定，不动
+  px += (targetX - px) * (1 - Math.pow(0.65, dt * 60));
+  // 开火：按火力规则齐射（弹道总宽封顶）
+  if (now - lastShot > 120) {
+    const n = streamsOf(power), dmg = dmgOf(power);
+    const spread = Math.min(88, (n - 1) * 15); // 弹道总宽必须小于怪的身宽（92）：摊得比怪还宽，边缘激光就是在打空气
+    for (let i = 0; i < n; i++) {
+      const off = n === 1 ? 0 : -spread / 2 + spread * (i / (n - 1));
+      bullets.push({ x: px + off, y: PLAYER_Y - 34, dmg });
+    }
+    lastShot = now;
+  }
+  for (const b of bullets) b.y -= 540 * dt;
+  bullets = bullets.filter(b => b.y > -12);
+  for (const e of enemies) { e.y += scroll; if (e.flash > 0) e.flash -= dt; }
+  for (const g of gates) g.y += 175 * dt; // 门速 175 像素/秒：从出现到必须选定约 3 秒——思考时间单独一个旋钮，与怪速脱钩
+  // 子弹命中
+  for (const b of bullets) {
+    let hit = null;
+    for (const e of enemies) {
+      if (Math.abs(b.x - e.x) < e.w / 2 + 10 && b.y < e.y + e.h / 2 && b.y > e.y - e.h / 2) { if (!hit || e.y > hit.y) hit = e; }
+    }
+    if (hit) {
+      hit.hp -= b.dmg; hit.flash = 0.05; b.y = -999;
+      if (hit.hp <= 0) { kills++; document.getElementById("kills").textContent = kills; enemies = enemies.filter(e => e !== hit); addFloat(hit.x, hit.y, "击破！", "#51cf66"); }
+    }
+  }
+  bullets = bullets.filter(b => b.y > -100);
+  // 闸门结算
+  for (const g of gates) {
+    if (!g.applied && g.y + 46 >= PLAYER_Y - 10) {
+      g.applied = true;
+      const op = px < W / 2 ? g.left : g.right;
+      const before = power;
+      power = applyOp(power, op);
+      document.getElementById("power").textContent = fmt(power);
+      addFloat(px, PLAYER_Y - 82, opLabel(op) + " → " + fmt(power), power >= before ? "#51cf66" : "#ff8787");
+      if (power <= 0) return finish(false);
+    }
+  }
+  gates = gates.filter(g => g.y < H + 60);
+  // 数字怪过线：按它剩下的血全额扣人数——打掉多少血，就少扣多少；
+  // 不设封顶：剩 1800 血的怪冲过去就是灾难，这正是选错门该付的账
+  for (const e of enemies) {
+    if (!e.resolved && e.y + e.h / 2 >= PLAYER_Y - 12) {
+      e.resolved = true;
+      const bite = e.hp;
+      power -= bite;
+      document.getElementById("power").textContent = fmt(Math.max(0, power));
+      addFloat(px, PLAYER_Y - 82, "被冲过去 -" + fmt(bite), "#ff8787");
+      e.y = H + 200; // 扣完这只就消失
+      if (power <= 0) return finish(false);
+    }
+  }
+  enemies = enemies.filter(e => e.y < H + 60);
+  for (const f of floats) { f.y -= 48 * dt; f.life -= dt; }
+  floats = floats.filter(f => f.life > 0);
+  draw(now);
+  raf = requestAnimationFrame(loop);
+}
+function addFloat(x, y, text, color) { floats.push({ x, y, text, color, life: 0.9 }); }
+
+function draw(now) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,.05)";
+  ctx.fillRect(W / 2 - 1, 0, 2, H);
+  ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.font = "13px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("左半场", W / 4, 20); ctx.fillText("右半场", W * 3 / 4, 20);
+  for (const g of gates) { drawGate(0, g.y, W / 2, g.left); drawGate(W / 2, g.y, W / 2, g.right); }
+  for (const e of enemies) {
+    ctx.fillStyle = e.flash > 0 ? "#ff8787" : "#845ef7";
+    rr(e.x - e.w / 2, e.y - e.h / 2, e.w, e.h, 12); ctx.fill();
+    if (e.resolved) { ctx.globalAlpha = 0.45; }
+    ctx.font = "30px serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText("👾", e.x, e.y + 6);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 21px sans-serif"; ctx.textBaseline = "top";
+    ctx.fillText(fmt(Math.max(0, e.hp)), e.x, e.y - e.h / 2 + 2);
+    ctx.globalAlpha = 1;
+  }
+  ctx.fillStyle = "#66d9e8";
+  for (const b of bullets) ctx.fillRect(b.x - 2, b.y - 9, 4, 13);
+  // 小队（人数越多，身后小人越多，最多画 4 个示意）
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const mates = Math.min(4, Math.floor(power / 8));
+  ctx.font = "26px serif";
+  for (let i = 0; i < mates; i++) {
+    const off = (i - (mates - 1) / 2) * 30;
+    ctx.fillText("🤖", px + off, PLAYER_Y + 30);
+  }
+  ctx.font = "42px serif";
+  ctx.fillText("🤖", px, PLAYER_Y);
+  ctx.fillStyle = "#ffd43b";
+  ctx.beginPath(); ctx.arc(px, PLAYER_Y - 44, 17, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#212529"; ctx.font = "bold 14px sans-serif";
+  ctx.fillText(fmt(power), px, PLAYER_Y - 43);
+  for (const f of floats) {
+    ctx.globalAlpha = Math.min(1, f.life / 30);
+    ctx.fillStyle = f.color; ctx.font = "bold 20px sans-serif";
+    ctx.fillText(f.text, f.x, f.y);
+    ctx.globalAlpha = 1;
+  }
+}
+function drawGate(x, y, w, op) {
+  const good = opGood(op, Math.max(1, power));
+  ctx.fillStyle = good ? "rgba(81,207,102,.30)" : "rgba(255,107,107,.30)";
+  ctx.fillRect(x + 3, y, w - 6, 46);
+  ctx.strokeStyle = good ? "#51cf66" : "#ff6b6b"; ctx.lineWidth = 2;
+  ctx.strokeRect(x + 3, y, w - 6, 46);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 25px sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(opLabel(op), x + w / 2, y + 24);
+}
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function finish(win) {
+  running = false; draw(performance.now());
+  document.getElementById("msg").textContent = win
+    ? "🏁 到达终点！最终人数 " + fmt(power) + "，击破 " + kills + " 只数字怪"
+    : "人数被耗光啦……想一想：哪道门选错了？前期是不是太贪了？";
+  document.getElementById("btn").textContent = "再来一局";
+}
+document.getElementById("btn").onclick = () => {
+  power = 3; kills = 0; bullets = []; enemies = []; gates = []; floats = [];
+  stepIdx = 0; cycle = 0; px = targetX = W / 2;
+  document.getElementById("power").textContent = "3";
+  document.getElementById("kills").textContent = "0";
+  document.getElementById("time").textContent = "0";
+  document.getElementById("streams").textContent = "1";
+  document.getElementById("msg").textContent = "";
+  document.getElementById("btn").textContent = "重新开始";
+  running = true; startTime = performance.now(); nextStepAt = startTime + 500; lastShot = 0; lastFrame = 0;
+  if (raf) cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(loop);
+};
+function move(clientX) {
+  const r = cv.getBoundingClientRect();
+  targetX = Math.max(30, Math.min(W - 30, (clientX - r.left) * (W / r.width)));
+}
+cv.addEventListener("mousemove", e => move(e.clientX));
+cv.addEventListener("touchmove", e => { move(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
+cv.addEventListener("pointermove", e => { if (e.pointerType === "touch") move(e.clientX); });
+draw(0);
+</script>
+</body>
+</html>

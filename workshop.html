@@ -63,7 +63,7 @@
     </details>
     <div>
       <button id="b_build">✨ 装上我的关卡！</button>
-      <button id="b_sandbox" class="warn">🧪 随便试试（不检查）</button>
+      <button id="b_sandbox" class="warn">🧪 随便试试（放开限制）</button>
       <button id="b_reset" class="ghost">↺ 换回示范关卡</button>
     </div>
     <div id="report">把文件粘进来，点那颗大按钮装上它！</div>
@@ -154,8 +154,8 @@ function buildLevel(parsed, sandbox) {
   for (const s of steps) {
     const ops = (s.type === "gate" || s.type === "pair") ? [s.left, s.right] : s.type === "item" ? [s.op] : [];
     for (const op of ops) {
-      if (op[0] === "×" && ![2, 3].includes(op[1])) errors.push("第 " + s.line + " 行：× 只许 2 或 3，你写了 ×" + op[1] + "。");
-      if (op[0] === "÷" && op[1] !== 2) errors.push("第 " + s.line + " 行：÷ 只许 ÷2，你写了 ÷" + op[1] + "。");
+      if (!sandbox && op[0] === "×" && ![2, 3].includes(op[1])) errors.push("第 " + s.line + " 行：× 只许 2 或 3，你写了 ×" + op[1] + "。");
+      if (!sandbox && op[0] === "÷" && op[1] !== 2) errors.push("第 " + s.line + " 行：÷ 只许 ÷2，你写了 ÷" + op[1] + "。");
     }
     if ((s.type === "enemy" || s.type === "pair") && !sandbox && (s.pct < 35 || s.pct > 70)) errors.push("第 " + s.line + " 行：强度必须在 35% 到 70% 之间，你写了 " + s.pct + "%。");
   }
@@ -517,7 +517,7 @@ function doBuild(sandbox) {
   const rep = document.getElementById("report");
   if (r.ok) {
     script = r.script;
-    let html = '<span class="ok">✔ 装配成功' + (sandbox ? "（沙盒模式：跳过了强度检查）" : "") + '</span>\n全选对路线：最终 ' + fmt(r.optFinal) + ' 人；全选错路线：会漏 ' + r.worstLeaks + ' 只怪。';
+    let html = '<span class="ok">✔ 装配成功' + (sandbox ? "（沙盒模式：放开了强度和门的限制）" : "") + '</span>\n全选对路线：最终 ' + fmt(r.optFinal) + ' 人；全选错路线：会漏 ' + r.worstLeaks + ' 只怪。';
     if (r.warnings.length) html += '\n<span class="soft">提醒（可以不听）：</span>\n' + r.warnings.map(w => "· " + w).join("\n");
     rep.innerHTML = html;
   } else {

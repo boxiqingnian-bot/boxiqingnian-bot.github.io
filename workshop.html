@@ -375,7 +375,7 @@ function draw(now) {
       ctx.font = (e.mini ? 21 : 30) + "px serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
       ctx.fillText(theme.emoji, e.x, e.y + 6);
     }
-    ctx.fillStyle = "#fff"; ctx.font = "bold " + (e.mini ? 16 : 21) + "px sans-serif"; ctx.textBaseline = "top";
+    ctx.fillStyle = "#fff"; ctx.font = "bold " + (e.mini ? 20 : 27) + "px sans-serif"; ctx.textBaseline = "top";
     ctx.fillText(fmt(Math.max(0, e.hp)), e.x, e.y - e.h / 2 + 2);
     if (e.shield > 0) { ctx.fillStyle = "#66d9e8"; ctx.font = "bold 13px sans-serif"; ctx.fillText("🛡" + fmt(e.shield), e.x, e.y - e.h / 2 - 15); }
     if (e.split && !e.mini) { ctx.fillStyle = "#ffd43b"; ctx.font = "bold 12px sans-serif"; ctx.fillText("分裂", e.x, e.y + e.h / 2 - 13); }
@@ -392,9 +392,13 @@ function draw(now) {
     drawCover(skinImgs.pimg, px - 19, PLAYER_Y - 19, 38, 38); ctx.restore();
     ctx.strokeStyle = "#ffd43b"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, PLAYER_Y, 19, 0, Math.PI * 2); ctx.stroke();
   } else { ctx.font = "32px serif"; ctx.fillText("🧑‍🚀", px, PLAYER_Y); }
-  ctx.fillStyle = "#ffd43b"; ctx.beginPath(); ctx.arc(px, PLAYER_Y - 26, 17, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#212529"; ctx.font = "bold 13px sans-serif";
-  ctx.fillText(fmt(power), px, PLAYER_Y - 26);
+  const pwLabel = fmt(power);
+  ctx.font = "bold 19px sans-serif";
+  const pwW = ctx.measureText(pwLabel).width;
+  ctx.fillStyle = "#ffd43b";
+  rr(px - pwW / 2 - 9, PLAYER_Y - 41, pwW + 18, 30, 15); ctx.fill();
+  ctx.fillStyle = "#212529";
+  ctx.fillText(pwLabel, px, PLAYER_Y - 25);
   ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = "12px sans-serif";
   ctx.fillText(theme.sname, px, PLAYER_Y + 44);
   for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life * 1.6); ctx.fillStyle = f.color; ctx.font = "bold 17px sans-serif"; ctx.fillText(f.text, f.x, f.y); ctx.globalAlpha = 1; }

@@ -31,6 +31,7 @@
   #b_start { background:linear-gradient(180deg,#ff8a5c,#e8590c); font-size:16px; padding:12px 30px; }
 
   @media (max-width: 560px) { canvas { max-width: 100%; height: auto; } }
+  @media (max-width: 900px) { .wrap { padding: 10px; gap: 10px; } .panel { width: min(410px, 100%); box-sizing: border-box; } canvas { max-width: 100%; height: auto; } }
 </style>
 </head>
 <body>
@@ -74,8 +75,10 @@
     <div><button id="b_code" class="share">生成我的关卡码</button></div>
     <label>关卡码（把这串字复制，发到聊天里给同伴）</label>
     <textarea id="shareout" rows="3" readonly></textarea>
+    <div><button id="b_copycode" class="ghost">📋 复制关卡码</button></div>
     <label>我的关卡链接（点开就能玩这一关）</label>
     <input type="text" id="linkout" readonly>
+    <div><button id="b_copylink" class="ghost">📋 复制链接</button></div>
     <label>玩同伴的关卡：把他的关卡码粘在这里</label>
     <textarea id="sharein" rows="2"></textarea>
     <div><button id="b_import" class="share">📥 装上同伴的关卡</button></div>
@@ -544,6 +547,16 @@ function encodePayload() {
   const payload = JSON.stringify({ t: readTheme(), l: document.getElementById("level").value });
   return btoa(unescape(encodeURIComponent(payload)));
 }
+async function copyField(id, btn) {
+  const el = document.getElementById(id);
+  if (!el.value) { const o = btn.textContent; btn.textContent = "先点上面的生成"; setTimeout(() => btn.textContent = o, 1600); return; }
+  try { await navigator.clipboard.writeText(el.value); }
+  catch (e) { el.focus(); el.select(); document.execCommand("copy"); }
+  const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
+  btn.textContent = "✓ 已复制"; setTimeout(() => btn.textContent = old, 1600);
+}
+document.getElementById("b_copycode").onclick = e => copyField("shareout", e.currentTarget);
+document.getElementById("b_copylink").onclick = e => copyField("linkout", e.currentTarget);
 document.getElementById("b_code").onclick = () => {
   if (!script) { document.getElementById("report").innerHTML = '<span class="err">先装配成功，才能生成分享。</span>'; return; }
   const code = encodePayload();

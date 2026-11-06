@@ -124,7 +124,9 @@ function parseLevel(text) {
   const steps = [], errors = [], theme = {};
   const lines = String(text).split(/\n/);
   lines.forEach((raw, i) => {
-    const lineNo = i + 1, s = raw.trim();
+    const lineNo = i + 1;
+    let s = raw.trim();
+    while (/^(门|怪)[:：]\1[:：]/.test(s)) s = s.slice(2); // 容错：行首写重了一个“门：/怪：”时自动合并
     if (!s || s.startsWith("#")) return;
     let m = s.match(/^(标题|怪名|怪样|队名|胜句|败句)[:：](.+)$/);
     if (m) { theme[HEADER_KEYS[m[1]]] = m[2].trim(); return; }
@@ -177,27 +179,33 @@ function buildLevel(parsed, sandbox) {
     }
   }
   // 双路模拟：死路检查 + 标定（血量按最优路线的火力换算）
+  // 沙盒标定折算：出格的门（×>3、÷≠2）算怪血量时按规矩内上限折算，实际过门仍照实结算——沙盒里后果是真的
+  const clampOp = op => op[0] === "×" && op[1] > 3 ? ["×", 3] : op[0] === "÷" && op[1] !== 2 ? ["÷", 2] : op;
   function simulate(pickBetter) {
-    let power = 3; const built = [];
+    let power = 3, calPower = 3; const built = []; // calPower 是标定专用轨迹，仅沙盒时与真实轨迹分叉
     for (const s of steps) {
       if (s.type === "gate") {
         const a = applyOp(power, s.left), b = applyOp(power, s.right);
         if (a <= 0 || b <= 0) errors.push("第 " + s.line + " 行是死路门：有一边算完人数会变成 0 或负数。");
         power = pickBetter ? Math.max(a, b) : Math.min(a, b);
+        const ca = applyOp(calPower, clampOp(s.left)), cb = applyOp(calPower, clampOp(s.right));
+        calPower = pickBetter ? Math.max(ca, cb) : Math.min(ca, cb);
         built.push({ type: "gate", left: s.left, right: s.right });
       } else if (s.type === "item") {
         const a = applyOp(power, s.op);
         if (a <= 0) errors.push("第 " + s.line + " 行道具门会让人数变成 0 或负数。");
-        power = a; built.push({ type: "item", op: s.op });
+        power = a; calPower = applyOp(calPower, clampOp(s.op)); built.push({ type: "item", op: s.op });
       } else if (s.type === "pair") {
         const a = applyOp(power, s.left), b = applyOp(power, s.right);
         if (a <= 0 || b <= 0) errors.push("第 " + s.line + " 行（双线）是死路门：有一边算完人数会变成 0 或负数。");
-        const hp = Math.max(4, Math.round(dpsOf(power) * WIN_S * s.pct / 100));
+        const hp = Math.max(4, Math.round(dpsOf(sandbox ? calPower : power) * WIN_S * s.pct / 100));
         built.push({ type: "pair", hp, left: s.left, right: s.right });
         power = pickBetter ? Math.max(a, b) : Math.min(a, b);
+        const ca2 = applyOp(calPower, clampOp(s.left)), cb2 = applyOp(calPower, clampOp(s.right));
+        calPower = pickBetter ? Math.max(ca2, cb2) : Math.min(ca2, cb2);
       } else {
         // 零件算在总血量预算之内：护盾/分裂只改变打法与样子，不额外加总量（否则 Boss+护盾会顶到窗口 95%、全对路线也打不死）
-        const budget = Math.max(4, Math.round(dpsOf(power) * WIN_S * s.pct / 100));
+        const budget = Math.max(4, Math.round(dpsOf(sandbox ? calPower : power) * WIN_S * s.pct / 100));
         let hp = budget, shield = 0, splitHp = 0;
         if (s.part === "护盾") { shield = Math.round(budget * 0.3); hp = budget - shield; }
         if (s.part === "分裂") { hp = Math.round(budget * 0.7); splitHp = Math.round(budget * 0.15); }
@@ -213,6 +221,7 @@ function buildLevel(parsed, sandbox) {
   let wPower = 3, leaks = 0;
   for (let i = 0; i < steps.length; i++) {
     const s = steps[i], b = opt.built[i];
+    if (!b) break; // 模拟在死路处提前结束时 built 会变短，后面没有可对齐的标定，别崩
     if (s.type === "gate" || s.type === "pair") { if (dpsOf(wPower) * WIN_S < (b.hp || 0) && s.type === "pair") leaks++; wPower = Math.min(applyOp(wPower, s.left), applyOp(wPower, s.right)); }
     else if (s.type === "item") wPower = applyOp(wPower, s.op);
     else if (dpsOf(wPower) * WIN_S < b.hp) leaks++;
@@ -221,7 +230,7 @@ function buildLevel(parsed, sandbox) {
   if (leaks < 2) warnings.push("按全选错来玩，只漏 " + leaks + " 只怪——这关坑不住人，选对选错差别不大。");
   if (opt.power < 90) warnings.push("全选对最后也只有 " + opt.power + " 人，长不大，后面会没劲——把门的数字给大方一点。");
   const errs = [...new Set(errors)]; // 两路模拟会重复报告同一处死路，去重
-  return { ok: errs.length === 0, errors: errs, warnings, script: opt.built, optFinal: opt.power, worstLeaks: leaks };
+  return { ok: errs.length === 0, errors: errs, warnings, script: opt.built, optFinal: opt.power, worstLeaks: leaks, hasParseErrors: parsed.errors.length > 0 };
 }
 // ===PURE-END===
 </script>
@@ -526,12 +535,18 @@ function doBuild(sandbox) {
   const rep = document.getElementById("report");
   if (r.ok) {
     script = r.script;
-    let html = '<span class="ok">✔ 装配成功' + (sandbox ? "（沙盒模式：放开了强度和门的限制）" : "") + '</span>\n全选对路线：最终 ' + fmt(r.optFinal) + ' 人；全选错路线：会漏 ' + r.worstLeaks + ' 只怪。';
+    let html = '<span class="ok">✔ 装配成功' + (sandbox ? "（沙盒模式：放开了限制，后果真实）" : "") + '</span>\n全选对路线：最终 ' + fmt(r.optFinal) + ' 人；全选错路线：会漏 ' + r.worstLeaks + ' 只怪。';
     if (r.warnings.length) html += '\n<span class="soft">提醒（可以不听）：</span>\n' + r.warnings.map(w => "· " + w).join("\n");
     rep.innerHTML = html;
   } else {
     script = null;
-    rep.innerHTML = '<span class="err">✘ 装配被拦下了：</span>\n' + r.errors.map(e => "· " + e).join("\n") + '\n把这几句原样发给工程师，它会改好再给你。';
+    let html = sandbox
+      ? '<span class="err">✘ 沙盒也没能装上：</span>沙盒只放开数字和强度，下面这几条还是不行：\n'
+      : '<span class="err">✘ 装配被拦下了：</span>\n';
+    html += r.errors.map(e => "· " + e).join("\n");
+    if (r.hasParseErrors) html += '\n<span class="soft">提醒：有行没读懂，后面的门是按"缺了那一行"算的，可能冤枉了后面的行——先把没读懂的行改对，再点一次。</span>';
+    html += '\n把这几句原样发给工程师，它会改好再给你。';
+    rep.innerHTML = html;
   }
   draw(performance.now());
 }

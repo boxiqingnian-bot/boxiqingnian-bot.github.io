@@ -3,593 +3,958 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的游戏工坊 · 数字门大冒险</title>
+<title>数字门大冒险 · 工坊试玩</title>
 <style>
-  body { margin:0; background:linear-gradient(180deg,#182052,#0a1128); color:#eef1ff; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
-  .wrap { display:flex; gap:16px; justify-content:center; align-items:flex-start; padding:16px; flex-wrap:wrap; }
-  .panel { width:410px; background:#232946; border:2px solid #3d4470; border-radius:20px; padding:16px 18px; box-shadow:0 10px 30px rgba(0,0,0,.35); }
-  .panel h2 { margin:2px 0 12px; font-size:22px; }
-  .panel h3 { margin:16px 0 8px; font-size:16px; color:#ffd43b; }
-  .panel label { font-size:13px; color:#a8b2d8; display:block; margin:8px 0 3px; font-weight:600; }
-  .panel input[type=text], .panel textarea { width:100%; box-sizing:border-box; background:#171b31; color:#eef1ff; border:2px solid #3d4470; border-radius:12px; padding:8px 10px; font-size:14px; }
-  .panel textarea { font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.55; }
-  .row { display:flex; gap:10px; } .row > div { flex:1; }
-  button { background:#4dabf7; color:#fff; border:none; border-radius:999px; padding:10px 16px; font-size:14px; font-weight:700; cursor:pointer; margin:3px 2px; }
-  button.warn { background:#e8590c; } button.ghost { background:#343a5e; } button.share { background:#845ef7; }
-  #b_build { background:linear-gradient(180deg,#ff8a5c,#e8590c); font-size:17px; padding:13px 26px; box-shadow:0 4px 14px rgba(232,89,12,.45); }
-  #report { font-size:14px; line-height:1.7; background:#171b31; border:2px dashed #3d4470; border-radius:12px; padding:10px 12px; min-height:48px; white-space:pre-wrap; margin-top:10px; }
-  .err { color:#ff8787; } .ok { color:#51cf66; } .soft { color:#ffd43b; }
-  details.teachertools { margin-top:12px; background:#1b2038; border-radius:12px; padding:8px 12px; }
-  details.teachertools summary { color:#8b93b8; font-size:13px; cursor:pointer; font-weight:600; }
-  .stage { text-align:center; }
-  canvas { background:#1b1e2a; border:3px solid #3d4470; border-radius:18px; touch-action:none; display:block; }
-  .hud { display:flex; gap:10px; justify-content:center; font-size:15px; margin:10px 0 6px; flex-wrap:wrap; }
-  .hud span { background:#232946; border:2px solid #3d4470; padding:5px 14px; border-radius:999px; }
-  .bar { height:9px; background:#232946; border-radius:5px; overflow:hidden; width:480px; max-width:92vw; margin:0 auto 6px; }
-  .bar > div { height:100%; background:#51cf66; width:0%; }
-  .tip { color:#8b93b8; font-size:12.5px; margin-top:8px; line-height:1.65; }
-  #b_start { background:linear-gradient(180deg,#ff8a5c,#e8590c); font-size:16px; padding:12px 30px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg,#16215c,#0a1128); color: #eaf2ff; min-height: 100vh; }
+  .wrap { display: flex; gap: 18px; justify-content: center; align-items: flex-start; padding: 18px 14px 26px; flex-wrap: wrap; }
+  .panel { width: 470px; max-width: 100%; background: #232946; border: 2px solid #3d4470; border-radius: 20px; padding: 16px 18px 18px; }
+  .panel h2 { font-size: 21px; margin-bottom: 8px; }
+  .panel h3 { font-size: 14px; color: #ffd43b; margin: 14px 0 6px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .row button { font-size: 13.5px; font-weight: 700; padding: 8px 12px; border-radius: 12px; border: 2px solid #3d4470; background: #171b31; color: #eaf2ff; cursor: pointer; }
+  .row button.main { background: #845ef7; border-color: #845ef7; font-size: 15.5px; padding: 10px 18px; flex: 1; }
+  textarea { width: 100%; height: 400px; background: #111528; color: #eaf2ff; border: 2px solid #3d4470; border-radius: 12px; padding: 10px 12px; font: 14px/1.6 Consolas, "Microsoft YaHei", monospace; resize: vertical; }
+  .report { font-size: 13.5px; line-height: 1.75; background: #171b31; border-radius: 12px; padding: 10px 12px; margin-top: 8px; min-height: 60px; }
+  .report .ok { color: #8ce99a; } .report .err { color: #ffa8a8; } .report .warn { color: #ffe066; } .report .info { color: #c5cdf0; }
+  .parts { font-size: 13px; line-height: 1.8; color: #c5cdf0; }
+  .parts b { color: #ffd43b; font-weight: 700; }
+  .parts code { background: #171b31; border-radius: 6px; padding: 1px 6px; color: #eaf2ff; font-family: inherit; }
+  .tip { color: #8b93b8; font-size: 12.5px; line-height: 1.65; margin-top: 8px; }
+  .pill { font-size: 13.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 2px solid #3d4470; background: #171b31; color: #eaf2ff; cursor: pointer; }
 
-  @media (max-width: 560px) { canvas { max-width: 100%; height: auto; } }
-  @media (max-width: 900px) { .wrap { padding: 10px; gap: 10px; } .panel { width: min(410px, 100%); box-sizing: border-box; } canvas { max-width: 100%; height: auto; } }
+  .panel label { display: block; font-size: 13px; color: #c5cdf0; margin: 8px 0 4px; }
+  textarea.share { height: 76px; }
+  textarea.sharein { height: 56px; }
+  input.share { width: 100%; background: #111528; color: #eaf2ff; border: 2px solid #3d4470; border-radius: 12px; padding: 9px 12px; font-size: 13px; }
+  .stage { text-align: center; width: 500px; max-width: 100%; }
+  h1 { font-size: 28px; letter-spacing: 2px; margin-bottom: 8px; }
+  .hud { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .hud div { background: #232946; border: 2px solid #3d4470; padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .hud .power { background: #2b5ea7; border-color: #2b5ea7; font-size: 17px; }
+  canvas { background: linear-gradient(#131f3d, #0a1122); border: 3px solid #3d4470; border-radius: 18px; touch-action: none; box-shadow: 0 12px 34px rgba(0,0,0,.55); width: min(480px, 100%, calc((100dvh - 300px) * 0.774)); height: auto; }
+  .bar { width: 480px; max-width: 100%; height: 9px; background: #232946; border-radius: 5px; margin: 10px auto 0; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: #51cf66; }
+  .msg { min-height: 26px; margin-top: 10px; font-size: 17px; font-weight: 800; color: #ffd43b; }
+  .sub { min-height: 20px; margin-top: 4px; font-size: 14px; color: #a9b4e0; }
+  .btn { font-size: 18px; font-weight: 800; padding: 12px 44px; border: none; border-radius: 999px; background: linear-gradient(180deg,#ff8a5c,#e8590c); color: #fff; cursor: pointer; margin-top: 10px; }
+  .ctl { margin-top: 10px; display: flex; gap: 8px; justify-content: center; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="panel">
-    <h2>🎮 我的游戏工坊</h2>
+    <h2>我的关卡文件</h2>
     <div class="row">
-      <div><label>我给游戏起的名字</label><input type="text" id="t_title" value="激光数字门"></div>
-      <div><label>怪的样子（挑个 emoji）</label><input type="text" id="t_emoji" value="👾"></div>
+      <button id="s_first">🎮 先玩关</button>
+      <button id="s_base">样例：标准底稿</button>
+      <button id="s_trap">样例：陷阱大师</button>
+      <button id="s_parts">样例：零件大杂烩</button>
     </div>
-    <div class="row">
-      <div><label>怪的名字</label><input type="text" id="t_mname" value="数字怪"></div>
-      <div><label>我的小队叫什么</label><input type="text" id="t_sname" value="激光小队"></div>
-    </div>
-    <label>赢的时候喊的话</label><input type="text" id="t_win" value="到达终点！">
-    <label>输的时候说的话</label><input type="text" id="t_fail" value="小队被冲散了……">
-    <details class="teachertools"><summary>🎨 美化：给游戏换上图片（可跳过）</summary>
-    <label>背景图（有图片地址就填，没有就空着）</label><input type="text" id="t_bg" value="" placeholder="https://…">
-    <div class="row">
-      <div><label>怪的图片（可空）</label><input type="text" id="t_mimg" value="" placeholder="https://…"></div>
-      <div><label>主角的图片（可空）</label><input type="text" id="t_pimg" value="" placeholder="https://…"></div>
-    </div>
-    </details>
-
-    <h3>📋 把工程师给我的文件粘在这里</h3>
-    <textarea id="level" rows="12" spellcheck="false"></textarea>
-    <details class="teachertools"><summary>🔧 老师工具：示范关卡（一般不用点）</summary>
-      <button id="b_preset1" class="ghost">示范：原版关卡</button>
-      <button id="b_preset2" class="ghost">示范：食堂大战</button>
-      <button id="b_preset3" class="ghost">故意写错的疯狂版</button>
-      <button id="b_preset4" class="ghost">示范：双线作战</button>
-    </details>
-    <div>
-      <button id="b_build">✨ 装上我的关卡！</button>
-      <button id="b_sandbox" class="warn">🧪 随便试试（放开限制）</button>
-      <button id="b_reset" class="ghost">↺ 换回示范关卡</button>
-    </div>
-    <div id="report">把文件粘进来，点那颗大按钮装上它！</div>
+    <textarea id="level" spellcheck="false"></textarea>
+    <div class="row"><button class="main" id="b_build">装上我的关卡</button></div>
+    <div class="report" id="report"></div>
 
     <h3>🎁 把我的关卡发给同伴</h3>
-    <div><button id="b_code" class="share">生成我的关卡码</button></div>
+    <div class="row"><button class="main" id="b_code" style="flex:1">生成我的关卡码</button></div>
     <label>关卡码（把这串字复制，发到聊天里给同伴）</label>
-    <textarea id="shareout" rows="3" readonly></textarea>
-    <div><button id="b_copycode" class="ghost">📋 复制关卡码</button></div>
-    <label>我的关卡链接（点开就能玩这一关）</label>
-    <input type="text" id="linkout" readonly>
-    <div><button id="b_copylink" class="ghost">📋 复制链接</button></div>
+    <textarea class="share" id="shareout" readonly spellcheck="false"></textarea>
+    <div class="row"><button id="b_copycode">📋 复制关卡码</button><button id="b_copylink">📋 复制关卡链接</button></div>
+    <label>我的关卡链接（同伴点开就能玩这一关）</label>
+    <input class="share" type="text" id="linkout" readonly>
     <label>玩同伴的关卡：把他的关卡码粘在这里</label>
-    <textarea id="sharein" rows="2"></textarea>
-    <div><button id="b_import" class="share">📥 装上同伴的关卡</button></div>
-    <p class="tip">格式备忘（一行一件事）：门：左 +5 ｜ 右 ×2　怪：强度 中（弱/中/强/Boss，可加 ｜ 护盾 或 ｜ 分裂）　道具门：+10　同刻：怪 强度 强 ｜ 门 左 +40 ｜ 右 ×2（第 3 步之后才能用）</p>
+    <textarea class="sharein" id="sharein" spellcheck="false"></textarea>
+    <div class="row"><button class="main" id="b_import" style="flex:1">装上同伴的关卡</button></div>
+
+    <h3>可以写的词</h3>
+    <div class="parts">
+      <b>主题</b>（六行都要有）：<code>标题</code> <code>怪名</code> <code>怪样</code> <code>队名</code> <code>胜句</code> <code>败句</code>；想加可以加：<code>队样</code> <code>Boss名</code> <code>Boss样</code><br>
+      <b>整关</b>：<code>速度：正常 / 快 / 飞快</code>　<code>难度：轻松 / 正常 / 硬核</code>（轻松：谁都能过，比星星；越难，不动脑越过不了）　<code>编号：随便一个数</code>（换编号 = 换一批门上的数字）<br>
+      <b>门</b>：<code>送分</code> <code>普通</code> <code>纠结</code>（两边差多少）；门型 <code>坑门</code>（两边都扣人）、<code>好坏门</code>（一边 ×2 一边扣人）；花样 <code>问号</code>（走近了才翻开）、<code>换位</code>（半路左右对调）<br>
+      <b>怪</b>：<code>强度 弱 / 中 / 强 / Boss</code>；走法 <code>晃</code>（左右晃着下来）<code>冲刺</code>（一冲一停）；队形 <code>三只</code>（三只小的排一排）<code>带小怪</code>（大怪带两只小怪挡枪）；零件 <code>护盾</code>（先打破盾）<code>分裂</code>（打掉变两只小的）；位置 <code>对面</code>（出在上一道好门的对面）<br>
+      <b>道具门</b>：<code>道具门：小</code> 或 <code>道具门：大</code>（整道门都是奖励，不用选）<br>
+      <b>同刻</b>：<code>同刻：怪 强度 强 ｜ 门 普通</code>（怪和门一起来，好门一定在怪的对面）
+    </div>
+    <p class="tip">一行一件事，词和词之间用「｜」或空格隔开。门和怪都不用写数字：你只说要什么，数字由网页按「全选对、打准就能过」来算。每次开局左右会随机对调。</p>
   </div>
 
   <div class="stage">
-    <div id="gametitle" style="font-size:19px;font-weight:bold;margin:2px 0;">数字门大冒险</div>
+    <h1 id="title">🚀 数字门大冒险</h1>
     <div class="hud">
-      <span>👥 人数 <b id="power">3</b></span>
-      <span>⏱ <b id="time">0</b>/90s</span>
-      <span>🔫 激光 <b id="streams">1</b> 条</span>
-      <span>💥 击破 <b id="kills">0</b></span>
+      <div class="power"><span id="team">👥 人数</span> <span id="power">3</span></div>
+      <div>💥 击破 <span id="kills">0</span></div>
+      <div>⏱ <span id="time">0</span> 秒</div>
     </div>
-    <div class="bar"><div id="prog"></div></div>
     <canvas id="cv" width="480" height="620"></canvas>
-    <div>
-      <button id="b_start">▶ 开始游戏</button>
-      <span class="tip">先在左边把关卡装好，再点开始。用鼠标或手指左右移动小队。</span>
-    </div>
-    <div id="endmsg" style="font-size:17px;min-height:24px;margin-top:4px;"></div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="msg" id="msg"></div>
+    <div class="sub" id="sub"></div>
+    <button class="btn" id="btn">开始游戏</button>
+    <div class="ctl"><button class="pill" id="fxBtn">✨ 效果：开</button><button class="pill" id="sndBtn">🔊 声音：开</button></div>
   </div>
 </div>
 
 <script>
 "use strict";
-// ===PURE-START===（纯逻辑：解析、校验、标定，可独立测试）
-const WIN_S = 556 / 117; // 怪从出现到过线的窗口（秒）≈4.75
-const TIERS = { "弱": 35, "中": 48, "强": 58, "Boss": 68, "boss": 68 };
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+const W = 480, H = 620, PLAYER_Y = H - 84, POWER_CAP = 999999, WIN_S = 556 / 117;
+const $ = id => document.getElementById(id);
+function fmt(n) { n = Math.ceil(n); return n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(Math.max(0, n)); }
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+// ===== 整关的设定 =====
+const SPEED = { "正常": 1, "快": 1.3, "飞快": 1.6 };
+// 难度 = 对「不动脑」有多不客气。轻松：谁都能过，比的是星星，余量固定。正常和硬核：装配时网页从 lo 往 hi 一档一档加厚怪的血（余量），加到不动脑机器人的通关率不超过 rnd 为止。
+// 怪的血量 = 全选对时的火力 × 这只怪给的时间 × 强度 × 余量
+const DIFF = { "轻松": { rnd: 1, lo: 0.7, hi: 0.7 }, "正常": { rnd: 0.2, lo: 0.8, hi: 1.2 }, "硬核": { rnd: 0.08, lo: 1.0, hi: 1.3 } };
+let SPD = 1, LV = null, IDEAL_FINAL = 3;
+function spd() { return SPD; }
+// 人的反应时间不会因为怪变快而变短：先从「露头到撞线」的时间里扣掉固定的 REACT 秒，剩下的才按速度缩
+const REACT = 0.4;
+function speedFactor() { return (WIN_S / spd() - REACT) / (WIN_S - REACT); }
+// 同刻的怪要慢一点，给人留出「跑去选门再跑回来」的时间（固定约 0.84 秒，不跟着速度缩）
+const DETOUR = WIN_S / 0.85 - WIN_S;
+function pairSpeedMul() { return 1 / (1 + DETOUR * spd() / WIN_S); }
+function pairGateFrac() { const tg = (0.55 + (PLAYER_Y - 10 - 46 + 52) / 175) / spd(), tm = WIN_S / spd() / pairSpeedMul(); return Math.max(0, Math.min(1, tg / tm)); }
+// 花样门留给人的时间也是固定的秒数：问号门在到脚下前 1.1 秒翻开，换位门在到脚下前 1.2 秒对调
+const REVEAL_T = 1.1, SWAP_T = 1.2;
+
+// ===== 火力 =====
+function streamsOf(p) { return Math.min(7, 1 + Math.floor(p / 15)); }
+function dmgOf(p) { return Math.max(1, p / 105); }
+function dpsOf(p) { return streamsOf(p) * dmgOf(p) / 0.12; }
+
+// ===== 门的运算（门最多把人数减到 1，门本身不会让人输）=====
 function applyOp(p, op) {
   let r = p;
-  if (op[0] === "+") r = p + op[1]; else if (op[0] === "-") r = p - op[1];
-  else if (op[0] === "×") r = p * op[1]; else if (op[0] === "÷") r = Math.floor(p / op[1]);
-  return Math.max(0, Math.min(999999, r));
+  if (op[0] === "+") r = p + op[1];
+  if (op[0] === "-") r = p - op[1];
+  if (op[0] === "×") r = p * op[1];
+  if (op[0] === "÷") r = Math.floor(p / op[1]);
+  return Math.max(1, Math.min(POWER_CAP, r));
 }
-function streamsOf(p) { return Math.min(7, 1 + Math.floor(p / 15)); }
-function dmgOf(p) { return 1 + Math.floor(p / 90); }
-function dpsOf(p) { return streamsOf(p) * dmgOf(p) / 0.12; }
-function normOp(ch) { return ch === "*" || ch === "x" || ch === "X" ? "×" : ch === "/" ? "÷" : ch; }
+function opLabel(op) { return (op[0] === "-" ? "−" : op[0]) + fmt(op[1]); }
 
-const HEADER_KEYS = { "标题": "title", "怪名": "mname", "怪样": "emoji", "队名": "sname", "胜句": "win", "败句": "fail" };
+// ===== 按「描述 + 编号」生成数字 =====
+function rng32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h % 90000 + 1000; }
+function nice(n) {
+  n = Math.max(1, n);
+  if (n < 100) return Math.round(n);
+  const m = Math.pow(10, Math.floor(Math.log10(n)) - 1);
+  return Math.round(n / m) * m;
+}
+// 纠结程度 = 门上的数字离「两边一样好」那个数有多远（1 表示正好一样好）
+const K_RANGES = { easy: [[0.3, 0.55], [1.7, 2.2]], normal: [[0.6, 0.8], [1.25, 1.5]], hard: [[0.82, 0.93], [1.08, 1.2]] };
+function pickK(R, level, side) { const pair = K_RANGES[level], coin = R() < 0.5, r = (side ? side === "lo" : coin) ? pair[0] : pair[1]; return r[0] + R() * (r[1] - r[0]); }
+// 一道门只记「门型 + 纠结程度」。数字等门出现的那一刻，按玩家当时的人数现算
+function gateSpec(R, kind, level, side) { return { kind, lv: kind === "E" ? "easy" : level, k: pickK(R, level, side), r: R(), flip: R() < 0.5 }; }
+function resolveGate(spec, p) {
+  p = Math.max(1, Math.round(p));
+  const k = spec.k; let a, b;
+  if (spec.kind === "A" || spec.kind === "B") {  // 加 对 乘
+    const m = spec.kind === "A" ? 2 : 3, even = p * (m - 1);
+    let n = nice(even * k); n = k < 1 ? Math.min(n, even - 1) : Math.max(n, even + 1);
+    a = ["+", Math.max(1, n)]; b = ["×", m];
+  } else if (spec.kind === "C") {                // 加 对 加
+    const big = Math.max(2, nice(p * (0.4 + spec.r * 0.5))), ratio = k < 1 ? k : 1 / k;
+    a = ["+", big]; b = ["+", Math.max(1, Math.min(big - 1, nice(big * ratio)))];
+  } else if (spec.kind === "D") {                // 坑门：减 对 除
+    // 减得比一半多的时候，选错亏得特别狠（减 3/4 和 减 1/2 差一倍），所以这一侧的差距收窄一些，和另一侧选错的代价差不多
+    const kk = k > 1 ? 1 + (k - 1) * 0.45 : k;
+    let n = nice(p / 2 * kk); n = kk < 1 ? Math.min(n, Math.ceil(p / 2) - 1) : Math.max(n, Math.floor(p / 2) + 2);
+    a = ["-", Math.max(1, Math.min(p - 1, n))]; b = ["÷", 2];
+  } else {                                       // 好坏门
+    a = ["×", 2]; b = ["-", Math.max(1, nice(p * (0.2 + spec.r * 0.3)))];
+  }
+  return spec.flip ? { left: b, right: a, lv: spec.lv } : { left: a, right: b, lv: spec.lv };
+}
+function itemBonus(size, p) { return Math.max(2, nice(p * (size === "大" ? 0.5 : 0.25))); }
+
+// ===== 读关卡文件 =====
+const STR = { "弱": 35, "中": 48, "强": 58, "boss": 68 };
+const GATE_WORDS = "送分、普通、纠结、坑门、好坏门、问号、换位";
+const MON_WORDS = "强度 弱/中/强/Boss、晃、冲刺、三只、带小怪、护盾、分裂、对面";
+function words(s) { return String(s).split(/[\s|｜,，、]+/).filter(Boolean); }
+function parseGateWords(str, lineNo, errors) {
+  const g = { lv: null, kind: null, deco: null };
+  if (/[左右]|[+\-×÷*xX/]\s*\d/.test(str)) { errors.push("第 " + lineNo + " 行：新版的门不写数字，只写感觉。可以用的词：" + GATE_WORDS + "。"); return g; }
+  for (const w of words(str)) {
+    if (w === "送分" || w === "送分门") g.lv = "easy";
+    else if (w === "普通" || w === "普通门") g.lv = "normal";
+    else if (w === "纠结" || w === "纠结门") g.lv = "hard";
+    else if (w === "坑门" || w === "坑") g.kind = g.kind ? "!" : "D";
+    else if (w === "好坏门" || w === "好坏") g.kind = g.kind ? "!" : "E";
+    else if (w === "问号" || w === "问号门") g.deco = g.deco ? "!" : "hide";
+    else if (w === "换位" || w === "换位门") g.deco = g.deco ? "!" : "swap";
+    else errors.push("第 " + lineNo + " 行有个词我不认识：「" + w + "」。门可以用的词：" + GATE_WORDS + "。");
+  }
+  if (g.kind === "!") errors.push("第 " + lineNo + " 行：坑门和好坏门只能选一种。");
+  if (g.deco === "!") errors.push("第 " + lineNo + " 行：一道门只能带一种花样，问号和换位选一个。");
+  if (!g.lv) g.lv = "normal";
+  return g;
+}
+function parseMonWords(str, lineNo, errors) {
+  const m = { pct: 0, move: null, form: null, armor: null, opp: false };
+  for (const w of words(str)) {
+    const lw = w.toLowerCase();
+    if (w === "强度") continue;
+    if (STR[lw]) { m.pct = m.pct ? -1 : STR[lw]; }
+    else if (/^\d+(\.\d+)?%?$/.test(w)) errors.push("第 " + lineNo + " 行：怪的强度不写数字，写 弱 / 中 / 强 / Boss。");
+    else if (w === "晃" || w === "摇晃" || w === "左右晃") m.move = m.move ? "!" : "sway";
+    else if (w === "冲刺") m.move = m.move ? "!" : "dash";
+    else if (w === "三只" || w === "三只小怪") m.form = m.form ? "!" : "trio";
+    else if (w === "带小怪") m.form = m.form ? "!" : "escort";
+    else if (w === "护盾") m.armor = m.armor ? "!" : "护盾";
+    else if (w === "分裂") m.armor = m.armor ? "!" : "分裂";
+    else if (w === "对面") m.opp = true;
+    else errors.push("第 " + lineNo + " 行有个词我不认识：「" + w + "」。怪可以用的词：" + MON_WORDS + "。");
+  }
+  if (m.pct === 0) errors.push("第 " + lineNo + " 行：这只怪还没写强度（弱 / 中 / 强 / Boss）。");
+  if (m.pct === -1) errors.push("第 " + lineNo + " 行：一只怪只能有一个强度。");
+  if (m.move === "!") errors.push("第 " + lineNo + " 行：晃和冲刺只能选一种走法。");
+  if (m.form === "!") errors.push("第 " + lineNo + " 行：三只和带小怪只能选一种队形。");
+  if (m.armor === "!") errors.push("第 " + lineNo + " 行：护盾和分裂只能选一个。");
+  if (m.form === "trio" && m.armor) errors.push("第 " + lineNo + " 行：三只小怪太小了，装不上" + m.armor + "。去掉「三只」或者去掉「" + m.armor + "」。");
+  if (m.form === "escort" && m.armor === "分裂") errors.push("第 " + lineNo + " 行：带小怪的怪不能再分裂，不然满屏都是怪。");
+  if (m.form === "escort" && m.pct > 0 && m.pct < 58) errors.push("第 " + lineNo + " 行：只有「强」和「Boss」才带得动小怪。");
+  m.move = m.move || "straight"; m.form = m.form || "one";
+  return m;
+}
+const THEME_KEYS = { "标题": "title", "怪名": "mon", "怪样": "monEmoji", "队名": "team", "队样": "teamEmoji", "boss名": "boss", "boss样": "bossEmoji", "胜句": "win", "败句": "lose", "速度": "speed", "难度": "diff", "编号": "seed" };
 function parseLevel(text) {
-  const steps = [], errors = [], theme = {};
-  const lines = String(text).split(/\n/);
-  lines.forEach((raw, i) => {
-    const lineNo = i + 1;
-    let s = raw.trim();
-    while (/^(门|怪)[:：]\1[:：]/.test(s)) s = s.slice(2); // 容错：行首写重了一个“门：/怪：”时自动合并
-    if (!s || s.startsWith("#")) return;
-    let m = s.match(/^(标题|怪名|怪样|队名|胜句|败句)[:：](.+)$/);
-    if (m) { theme[HEADER_KEYS[m[1]]] = m[2].trim(); return; }
-    m = s.match(/^同刻[:：]\s*怪\s*强度\s*(弱|中|强|Boss|boss|\d+(?:\.\d+)?\s*%?)\s*[|｜]\s*门\s*左\s*([+\-×÷*xX/])\s*(\d+)\s*[|｜]\s*右\s*([+\-×÷*xX/])\s*(\d+)$/);
+  const errors = [], theme = {}, steps = [];
+  String(text).split(/\n/).forEach((raw, i) => {
+    const lineNo = i + 1, s = raw.trim();
+    if (!s || /^(#|\/\/|```)/.test(s)) return;
+    let m = s.match(/^(标题|怪名|怪样|队名|队样|Boss名|Boss样|胜句|败句|速度|难度|编号)[:：]\s*(.*)$/i);
+    if (m) { theme[THEME_KEYS[m[1].toLowerCase()]] = m[2].trim(); return; }
+    m = s.match(/^同刻[:：]\s*怪[:：]?\s*(.*?)[|｜]\s*门[:：]?\s*(.*)$/);
+    if (m) { steps.push(Object.assign({ type: "pair", line: lineNo, mon: parseMonWords(m[1], lineNo, errors) }, parseGateWords(m[2], lineNo, errors))); return; }
+    if (/^同刻/.test(s)) { errors.push("第 " + lineNo + " 行：同刻要先写怪再写门，比如「同刻：怪 强度 强 ｜ 门 普通」。"); return; }
+    m = s.match(/^道具门[:：]?\s*(.*)$/);
     if (m) {
-      const t = m[1].replace(/\s|%/g, "");
-      const pct = TIERS[m[1].trim()] !== undefined ? TIERS[m[1].trim()] : parseFloat(t);
-      steps.push({ type: "pair", pct, left: [normOp(m[2]), +m[3]], right: [normOp(m[4]), +m[5]], line: lineNo });
-      return;
+      const w = m[1].trim();
+      if (w && w !== "小" && w !== "大") errors.push("第 " + lineNo + " 行：道具门只分「小」和「大」，不写数字。");
+      steps.push({ type: "item", size: w === "大" ? "大" : "小", line: lineNo }); return;
     }
-    m = s.match(/^门[:：]\s*左\s*([+\-×÷*xX/])\s*(\d+)\s*[|｜]\s*右\s*([+\-×÷*xX/])\s*(\d+)$/);
-    if (m) { steps.push({ type: "gate", left: [normOp(m[1]), +m[2]], right: [normOp(m[3]), +m[4]], line: lineNo }); return; }
-    m = s.match(/^道具门[:：]\s*([+\-])\s*(\d+)$/);
-    if (m) { steps.push({ type: "item", op: [m[1], +m[2]], line: lineNo }); return; }
-    m = s.match(/^怪[:：]\s*强度\s*(弱|中|强|Boss|boss|\d+(?:\.\d+)?\s*%?)\s*(?:[|｜]\s*(护盾|分裂))?$/);
-    if (m) {
-      const t = m[1].replace(/\s|%/g, "");
-      const pct = TIERS[m[1].trim()] !== undefined ? TIERS[m[1].trim()] : parseFloat(t);
-      steps.push({ type: "enemy", pct, part: m[2] || null, line: lineNo });
-      return;
-    }
-    errors.push("第 " + lineNo + " 行看不懂：\u201C" + s.slice(0, 24) + "\u201D");
+    m = s.match(/^门[:：]\s*(.*)$/);
+    if (m) { steps.push(Object.assign({ type: "gate", line: lineNo }, parseGateWords(m[1], lineNo, errors))); return; }
+    m = s.match(/^怪[:：]\s*(.*)$/);
+    if (m) { steps.push({ type: "enemy", line: lineNo, mon: parseMonWords(m[1], lineNo, errors) }); return; }
+    errors.push("第 " + lineNo + " 行看不懂：「" + s + "」。每一行要用 门： / 怪： / 道具门： / 同刻： 开头，或者是主题行。");
   });
-  return { steps, errors, theme };
+  return { errors, theme, steps };
 }
 
-function buildLevel(parsed, sandbox) {
-  const errors = [...parsed.errors], warnings = [];
-  const steps = parsed.steps;
-  if (!steps.length) errors.push("关卡文件是空的。");
-  // 运算合法性
+// ===== 把描述变成一关 =====
+function makeMonster(R, S, m, paired, Safter, lastGood) {
+  let side = R() < 0.5 ? "L" : "R"; const off = R() * 90 - 45, phase = R() * 6.28;
+  if (m.opp && lastGood) side = lastGood === "L" ? "R" : "L";
+  // 要追着打、要横穿过去的怪，血量预算先打个折；折得不够的，后面机器人试玩时还会再削
+  const factor = (m.form === "trio" ? 0.85 : m.form === "escort" ? 0.9 : 1) * (m.move === "sway" ? 0.9 : m.move === "dash" ? 0.95 : 1) * (m.opp ? 0.92 : 1);
+  // 同刻遇到坑门：穿过门以后人变少、火力变弱，怪的后半段要按变弱以后的火力算
+  let dps = dpsOf(S);
+  if (paired && Safter < S) { const f = pairGateFrac(); dps = dpsOf(S) * f + dpsOf(Safter) * (1 - f); }
+  const base = dps * WIN_S * speedFactor() * m.pct / 100 * factor;   // 余量为 1 时的血量；真正的血量在装配时乘上余量
+  return { side, off, phase, form: m.form, move: m.move, armor: m.armor, pct: m.pct, base, hp: Math.max(4, Math.round(base)), hp0: Math.max(4, Math.round(base)), speedMul: paired ? pairSpeedMul() : 1 };
+}
+function buildLevel(parsed) {
+  const errors = parsed.errors.slice(), warns = [], T = parsed.theme, src = parsed.steps;
+  const need = [["title", "标题"], ["mon", "怪名"], ["monEmoji", "怪样"], ["team", "队名"], ["win", "胜句"], ["lose", "败句"]].filter(k => !T[k[0]]).map(k => k[1]);
+  if (need.length) errors.push("主题行还缺：" + need.join("、") + "。六行主题一行都不能少。");
+  if (T.speed && !SPEED[T.speed]) errors.push("速度只能写：正常 / 快 / 飞快。");
+  if (T.diff && !DIFF[T.diff]) errors.push("难度只能写：轻松 / 正常 / 硬核。");
+  if (T.seed && !/^\d{1,9}$/.test(T.seed)) errors.push("编号要写一个数字，比如 2024。");
+  if (src.length < 12 || src.length > 24) errors.push("现在一共 " + src.length + " 步。一关要 12 到 24 步（一道门、一只怪、一次同刻各算一步）。");
+  const firstMon = src.find(s => s.mon);
+  if (firstMon && firstMon.mon.pct > 48) errors.push("第 " + firstMon.line + " 行：第一只怪不能比「中」更强，开局只有 3 个人。");
+  src.forEach((s, i) => { if (s.type === "pair" && i < 2) errors.push("第 " + s.line + " 行：同刻太靠前了。先让玩家学会一样一样来，前两步不能用。"); });
+  let pits = 0;
+  for (const s of src) {
+    if (s.type === "enemy" || s.type === "item") continue;      // 中间隔着怪也算连着
+    pits = s.kind === "D" ? pits + 1 : 0;
+    if (pits >= 3) { errors.push("第 " + s.line + " 行附近：连着 3 道坑门，玩家会喘不过气。"); break; }
+  }
+  let seenGate = false;
+  for (const s of src) {
+    if (s.mon && s.mon.opp && !seenGate) errors.push("第 " + s.line + " 行：「对面」是指上一道门的对面，可它前面还没有门。");
+    if (s.type === "gate" || s.type === "pair") seenGate = true;
+  }
+  if (errors.length) return { errors, warns, lv: null };
+
+  SPD = SPEED[T.speed || "正常"];
+  const seed = T.seed ? +T.seed : hashStr((T.title || "") + "|" + (T.team || "") + "|" + (T.mon || ""));
+  const R = rng32((seed >>> 0) * 2654435761);
+  const steps = [], lazy = { add: 0, mul: 0, pit: 0 }; let S = 3, lastGood = null, nGate = 0, nC = 0;
+  for (const s of src) {
+    if (s.type === "item") { steps.push({ type: "item", size: s.size, line: s.line, wait: 1200 }); S = applyOp(S, ["+", itemBonus(s.size, S)]); continue; }
+    if (s.type === "enemy") { steps.push({ type: "enemy", line: s.line, wait: 2800, mon: makeMonster(R, S, s.mon, false, S, lastGood) }); continue; }
+    let kind = s.kind;
+    const r = R();
+    if (!kind) {
+      kind = nGate === 0 ? "A" : r < 0.62 ? "A" : r < 0.82 ? "B" : "C";
+      if (S < 12 && kind === "B") kind = "A";
+      if (kind === "C" && (nC + 1) * 5 > nGate + 1) kind = "A";   // 「加 对 加」只要挑大的，太白给，五道门里最多一道
+      if (kind === "C") nC++;
+    }
+    nGate++;
+    // 不动脑有两种常见的死办法：「见加就选加」和「见乘就选乘」。每道 加 对 乘 的门，总有一种死办法会选错。
+    // 这里记着两种死办法一路各亏了多少，下一道门就让亏得少的那个选错：这样它们亏得差不多，谁也蒙不过去
+    let side;
+    if (kind === "A" || kind === "B") side = (lazy.add === lazy.mul ? R() < 0.5 : lazy.add < lazy.mul) ? "lo" : "hi";   // lo：乘法那边更好；hi：加法那边更好
+    else if (kind === "D") { side = lazy.pit ? (lazy.pit > 0 ? "hi" : "lo") : (R() < 0.5 ? "lo" : "hi"); lazy.pit += side === "lo" ? 1 : -1; }
+    const spec = gateSpec(R, kind, s.lv, side), g = resolveGate(spec, S);
+    if (kind === "A" || kind === "B") {
+      const top = Math.max(applyOp(S, g.left), applyOp(S, g.right)), plus = g.left[0] === "+" ? g.left : g.right, times = g.left[0] === "×" ? g.left : g.right;
+      lazy.add += Math.log(top / applyOp(S, plus)); lazy.mul += Math.log(top / applyOp(S, times));
+    }
+    const best = Math.max(applyOp(S, g.left), applyOp(S, g.right));
+    if (s.type === "pair") {
+      const mon = makeMonster(R, S, s.mon, true, best, lastGood);
+      const goodIsLeft = applyOp(S, g.left) >= applyOp(S, g.right);
+      if (goodIsLeft === (mon.side === "L")) spec.flip = !spec.flip;   // 同刻：好门一定在怪的对面
+      lastGood = mon.side === "L" ? "R" : "L";
+      steps.push({ type: "pair", line: s.line, wait: 2800, spec, deco: s.deco, mon });
+    } else {
+      lastGood = applyOp(S, g.left) >= applyOp(S, g.right) ? "L" : "R";
+      steps.push({ type: "gate", line: s.line, wait: 1500, spec, deco: s.deco });
+    }
+    S = best;
+  }
+  if (!src.some(s => s.mon && s.mon.pct >= 68)) warns.push("这一关还没有 Boss。想要压轴的大怪，可以把最后一只怪写成「强度 Boss」。");
+  const fancy = src.filter(s => s.deco).length;
+  if (fancy > 4) warns.push("问号门和换位门一共有 " + fancy + " 道，有点多，玩的人可能会烦。留两三道最坑的就够了。");
+  const theme = { title: T.title, mon: T.mon, monEmoji: T.monEmoji, team: T.team, teamEmoji: T.teamEmoji || "🤖", boss: T.boss || T.mon, bossEmoji: T.bossEmoji || T.monEmoji, win: T.win, lose: T.lose };
+  return { errors, warns, lv: { theme, speed: SPD, speedWord: T.speed || "正常", diffWord: T.diff || "正常", seed, steps, idealFinal: S } };
+}
+
+// ===== 一局的状态 =====
+let plan = [], power = 3, kills = 0, running = false, raf = null;
+let px = W / 2, targetX = W / 2;
+let bullets = [], enemies = [], gates = [], floats = [], particles = [], pendingSpawns = [];
+let startTime = 0, stepIdx = 0, nextStepAt = 0, lastShot = 0, lastFrame = 0;
+let fxOn = true, sndOn = true;
+let stat = { gates: 0, right: 0, leaks: 0, used: [] };
+// 机器人试玩用：SIM 为真时不画、不响、不碰页面，只算
+let SIM = false, simR = null, simWin = null, firstLeak = null, BOT = null;
+
+// 每次开局把关卡一段一段地左右翻面。一段 = 一道单独出场的门 + 它后面跟着的怪和同刻门，整段一起翻，
+// 所以「好门在怪的对面」「怪出在上一道好门的对面」这些关系翻完还在
+function freshPlan(lv, R) {
+  const steps = lv.steps.map(s => Object.assign({}, s, { spec: s.spec && Object.assign({}, s.spec), mon: s.mon && Object.assign({}, s.mon) }));
+  let m = false;
   for (const s of steps) {
-    const ops = (s.type === "gate" || s.type === "pair") ? [s.left, s.right] : s.type === "item" ? [s.op] : [];
-    for (const op of ops) {
-      if (!sandbox && op[0] === "×" && ![2, 3].includes(op[1])) errors.push("第 " + s.line + " 行：× 只许 2 或 3，你写了 ×" + op[1] + "。");
-      if (!sandbox && op[0] === "÷" && op[1] !== 2) errors.push("第 " + s.line + " 行：÷ 只许 ÷2，你写了 ÷" + op[1] + "。");
-    }
-    if ((s.type === "enemy" || s.type === "pair") && !sandbox && (s.pct < 35 || s.pct > 70)) errors.push("第 " + s.line + " 行：强度必须在 35% 到 70% 之间，你写了 " + s.pct + "%。");
+    if (s.type === "gate") m = R() < 0.5;
+    if (!m) continue;
+    if (s.spec) s.spec.flip = !s.spec.flip;
+    if (s.mon) { s.mon.side = s.mon.side === "L" ? "R" : "L"; s.mon.off = -s.mon.off; s.mon.phase += Math.PI; }
   }
-  if (!sandbox && (steps.length < 12 || steps.length > 24)) errors.push("总步数要在 12 到 24 步之间，你现在是 " + steps.length + " 步。");
-  const enemies = steps.filter(s => s.type === "enemy" || s.type === "pair");
-  if (!sandbox && enemies.length && enemies[0].pct > 48) errors.push("第一只怪太强了（" + enemies[0].pct + "%）：先让玩家上手，第一只只能是弱或中。");
-  steps.forEach((s, idx) => { if (s.type === "pair" && idx < 2) errors.push("第 " + s.line + " 行：双线事件（同刻）太靠前了——先让玩家学会单线，前两步不许用。"); });
-  if (!sandbox) { // 连续负向门
-    let streak = 0;
-    for (const s of steps) {
-      const neg = (s.type === "gate" || s.type === "pair") && ["-", "÷"].includes(s.left[0]) && ["-", "÷"].includes(s.right[0]);
-      streak = neg ? streak + 1 : 0;
-      if (streak >= 3) { errors.push("第 " + s.line + " 行附近：连续 3 道以上的坑门，玩家会喘不过气。"); break; }
-    }
-  }
-  // 双路模拟：死路检查 + 标定（血量按最优路线的火力换算）
-  // 沙盒标定折算：出格的门（×>3、÷≠2）算怪血量时按规矩内上限折算，实际过门仍照实结算——沙盒里后果是真的
-  const clampOp = op => op[0] === "×" && op[1] > 3 ? ["×", 3] : op[0] === "÷" && op[1] !== 2 ? ["÷", 2] : op;
-  function simulate(pickBetter) {
-    let power = 3, calPower = 3; const built = []; // calPower 是标定专用轨迹，仅沙盒时与真实轨迹分叉
-    for (const s of steps) {
-      if (s.type === "gate") {
-        const a = applyOp(power, s.left), b = applyOp(power, s.right);
-        if (a <= 0 || b <= 0) errors.push("第 " + s.line + " 行是死路门：有一边算完人数会变成 0 或负数。");
-        power = pickBetter ? Math.max(a, b) : Math.min(a, b);
-        const ca = applyOp(calPower, clampOp(s.left)), cb = applyOp(calPower, clampOp(s.right));
-        calPower = pickBetter ? Math.max(ca, cb) : Math.min(ca, cb);
-        built.push({ type: "gate", left: s.left, right: s.right });
-      } else if (s.type === "item") {
-        const a = applyOp(power, s.op);
-        if (a <= 0) errors.push("第 " + s.line + " 行道具门会让人数变成 0 或负数。");
-        power = a; calPower = applyOp(calPower, clampOp(s.op)); built.push({ type: "item", op: s.op });
-      } else if (s.type === "pair") {
-        const a = applyOp(power, s.left), b = applyOp(power, s.right);
-        if (a <= 0 || b <= 0) errors.push("第 " + s.line + " 行（双线）是死路门：有一边算完人数会变成 0 或负数。");
-        const hp = Math.max(4, Math.round(dpsOf(sandbox ? calPower : power) * WIN_S * s.pct / 100));
-        built.push({ type: "pair", hp, left: s.left, right: s.right });
-        power = pickBetter ? Math.max(a, b) : Math.min(a, b);
-        const ca2 = applyOp(calPower, clampOp(s.left)), cb2 = applyOp(calPower, clampOp(s.right));
-        calPower = pickBetter ? Math.max(ca2, cb2) : Math.min(ca2, cb2);
-      } else {
-        // 零件算在总血量预算之内：护盾/分裂只改变打法与样子，不额外加总量（否则 Boss+护盾会顶到窗口 95%、全对路线也打不死）
-        const budget = Math.max(4, Math.round(dpsOf(sandbox ? calPower : power) * WIN_S * s.pct / 100));
-        let hp = budget, shield = 0, splitHp = 0;
-        if (s.part === "护盾") { shield = Math.round(budget * 0.3); hp = budget - shield; }
-        if (s.part === "分裂") { hp = Math.round(budget * 0.7); splitHp = Math.round(budget * 0.15); }
-        built.push({ type: "enemy", hp, shield, split: s.part === "分裂", splitHp });
-        if (!pickBetter) { /* 最差路线不推进人数（怪只会扣血），保持 power 不变近似 */ }
-      }
-      if (power <= 0) break;
-    }
-    return { power, built };
-  }
-  const opt = simulate(true), worst = simulate(false);
-  // 全错路线漏怪数（built 与 steps 一一对齐；双线怪窗口更长，这里按普通窗口保守估）
-  let wPower = 3, leaks = 0;
-  for (let i = 0; i < steps.length; i++) {
-    const s = steps[i], b = opt.built[i];
-    if (!b) break; // 模拟在死路处提前结束时 built 会变短，后面没有可对齐的标定，别崩
-    if (s.type === "gate" || s.type === "pair") { if (dpsOf(wPower) * WIN_S < (b.hp || 0) && s.type === "pair") leaks++; wPower = Math.min(applyOp(wPower, s.left), applyOp(wPower, s.right)); }
-    else if (s.type === "item") wPower = applyOp(wPower, s.op);
-    else if (dpsOf(wPower) * WIN_S < b.hp) leaks++;
-  }
-  if (!enemies.some(e => e.pct >= 68)) warnings.push("整关没有 Boss，结尾可能不够带劲——考虑放一只压轴的。");
-  if (leaks < 2) warnings.push("按全选错来玩，只漏 " + leaks + " 只怪——这关坑不住人，选对选错差别不大。");
-  if (opt.power < 90) warnings.push("全选对最后也只有 " + opt.power + " 人，长不大，后面会没劲——把门的数字给大方一点。");
-  const errs = [...new Set(errors)]; // 两路模拟会重复报告同一处死路，去重
-  return { ok: errs.length === 0, errors: errs, warnings, script: opt.built, optFinal: opt.power, worstLeaks: leaks, hasParseErrors: parsed.errors.length > 0 };
+  return steps;
 }
-// ===PURE-END===
-</script>
-<script>
-"use strict";
-// —— 引擎（封版 v10 逻辑 + 零件） ——
-const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
-const W = 480, H = 620, PLAYER_Y = H - 84, GAME_LEN = 90;
-function fmt(n) { return n >= 10000 ? (n / 10000).toFixed(1).replace(/\.0$/, "") + "万" : String(Math.max(0, Math.round(n))); }
-let theme = { title: "激光数字门", emoji: "👾", mname: "数字怪", sname: "激光小队", win: "到达终点！", fail: "小队被冲散了……", bg: "", mimg: "", pimg: "" };
-const skinImgs = {};
-function loadSkin() {
-  for (const k of ["bg", "mimg", "pimg"]) {
-    const url = (theme[k] || "").trim();
-    if (url) { const im = new Image(); im.src = url; skinImgs[k] = im; } else delete skinImgs[k];
-  }
+function resetGame(lv, R, t0) {
+  plan = freshPlan(lv, R); SPD = lv.speed; IDEAL_FINAL = lv.idealFinal;
+  power = 3; kills = 0; bullets = []; enemies = []; gates = []; floats = []; particles = []; pendingSpawns = [];
+  stepIdx = 0; px = targetX = W / 2; stat = { gates: 0, right: 0, leaks: 0, used: [] }; firstLeak = null;
+  startTime = t0; nextStepAt = t0 + 500; lastShot = t0; lastFrame = 0;
 }
-function drawCover(img, x, y, w, h) {
-  const ir = img.naturalWidth / img.naturalHeight, r = w / h;
-  let sw, sh, sx, sy;
-  if (ir > r) { sh = img.naturalHeight; sw = sh * r; sx = (img.naturalWidth - sw) / 2; sy = 0; }
-  else { sw = img.naturalWidth; sh = sw / r; sx = 0; sy = (img.naturalHeight - sh) / 2; }
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-}
-function imgReady(k) { const im = skinImgs[k]; return im && im.complete && im.naturalWidth > 0; }
-let script = null; // 装配后的剧本
-let power = 3, kills = 0, running = false, raf = null;
-let bullets = [], enemies = [], gates = [], floats = [];
-let px = W / 2, targetX = W / 2, stepIdx = 0, nextStepAt = 0, lastShot = 0, startTime = 0, lastFrame = 0, pendingSpawns = [];
-function opLabel(op) { return (op[0] === "+" ? "+" : op[0] === "-" ? "−" : op[0]) + op[1]; }
 
+// ===== 汁水（纯表现）=====
+const PCOLORS = ["#b197fc", "#845ef7", "#ffd43b", "#51cf66", "#ffffff"];
+function burst(x, y, n, spread) {
+  if (!fxOn || SIM) return;
+  for (let i = 0; i < n; i++) {
+    if (particles.length > 280) break;
+    const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * (spread || 240), life = 0.4 + Math.random() * 0.3;
+    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, s: 2.5 + Math.random() * 3.5, c: PCOLORS[(Math.random() * PCOLORS.length) | 0], life, max: life });
+  }
+}
+function confetti() {
+  if (!fxOn) return;
+  for (let i = 0; i < 70; i++) {
+    const life = 0.9 + Math.random() * 0.7;
+    particles.push({ x: Math.random() * W, y: -10 - Math.random() * 120, vx: (Math.random() * 2 - 1) * 30, vy: 40 + Math.random() * 60, s: 3 + Math.random() * 4, c: PCOLORS[(Math.random() * PCOLORS.length) | 0], life, max: life });
+  }
+}
+function stepParticles(dt) {
+  for (const p of particles) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt; p.life -= dt; }
+  particles = particles.filter(p => p.life > 0);
+}
+function celebrate() {
+  let prev = performance.now();
+  function step(t) { const dt = Math.min(0.05, (t - prev) / 1000); prev = t; stepParticles(dt); draw(t); if (particles.length && !running) requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+}
+let AC = null, masterGain = null, lastKillSfx = 0;
+function initAudio() {
+  if (AC) { if (AC.state === "suspended") AC.resume(); return; }
+  try { const C = window.AudioContext || window.webkitAudioContext; if (!C) return; AC = new C(); masterGain = AC.createGain(); masterGain.gain.value = 0.22; masterGain.connect(AC.destination); } catch (e) { AC = null; }
+}
+function tone(f0, f1, dur, type, vol, delay) {
+  if (!AC || !sndOn) return;
+  const t = AC.currentTime + (delay || 0), o = AC.createOscillator(), g = AC.createGain();
+  o.type = type || "sine"; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur);
+  g.gain.setValueAtTime(vol || 0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g); g.connect(masterGain); o.start(t); o.stop(t + dur + 0.02);
+}
+function sfx(kind) {
+  if (SIM || !AC || !sndOn) return;
+  const now = performance.now();
+  if (kind === "kill") { if (now - lastKillSfx < 70) return; lastKillSfx = now; tone(300, 60, 0.14, "square", 0.32); tone(520, 880, 0.08, "triangle", 0.16); }
+  if (kind === "good") tone(540, 880, 0.10, "sine", 0.38);
+  if (kind === "bad") tone(150, 90, 0.16, "sawtooth", 0.20);
+  if (kind === "leak") tone(130, 55, 0.20, "square", 0.38);
+  if (kind === "flip") tone(700, 1100, 0.07, "triangle", 0.30);
+  if (kind === "dash") tone(200, 700, 0.18, "sawtooth", 0.22);
+  if (kind === "win") [523, 659, 784, 1046].forEach((f, i) => tone(f, f, 0.12, "triangle", 0.32, i * 0.09));
+  if (kind === "lose") tone(320, 80, 0.45, "sawtooth", 0.22);
+}
+function ui(id, text) { if (!SIM) $(id).textContent = text; }
+function addFloat(x, y, text, color, life) { if (!SIM) floats.push({ x: Math.max(120, Math.min(W - 120, x)), y, text, color, life: life || 0.9 }); }
+
+// ===== 出场 =====
+function spawnMonster(m, now, stepNo) {
+  const center = m.side === "L" ? W / 4 : W * 3 / 4;
+  const mk = o => Object.assign({ flash: 0, sq: 0, resolved: false, born: now, move: m.move, phase: m.phase, speedMul: m.speedMul, vx: 0, step: stepNo,
+    boss: m.pct >= 68, shield: 0, split: false, splitHp: 0, dash: m.move === "dash", dashing: false, mini: false, aimErr: SIM ? (simR() * 2 - 1) * BOT.err : 0 }, o);
+  if (m.form === "trio") {
+    for (let j = -1; j <= 1; j++) enemies.push(mk({ x: center + j * 70, x0: center + j * 70, y: -60, y0: -60, w: 60, h: 44, hp: Math.ceil(m.hp / 3), mini: true, boss: false, amp: 20 }));
+  } else if (m.form === "escort") {
+    // 带小怪：大怪占七成血走在后面，两只小怪各占一成半走在前面挡枪
+    const big = m.hp * 0.7, sh = m.armor === "护盾" ? Math.round(big * 0.3) : 0;
+    enemies.push(mk({ x: center, x0: center, y: -112, y0: -112, w: 92, h: 56, hp: Math.ceil(big - sh), shield: sh, amp: 20 }));
+    for (const j of [-1, 1]) enemies.push(mk({ x: center + j * 64, x0: center + j * 64, y: -60, y0: -60, w: 60, h: 44, hp: Math.ceil(m.hp * 0.15), mini: true, boss: false, amp: 20 }));
+  } else {
+    const x = m.move === "sway" ? center + m.off * 0.6 : center + m.off;
+    let hp = m.hp, shield = 0, splitHp = 0;
+    if (m.armor === "护盾") { shield = Math.round(m.hp * 0.3); hp = m.hp - shield; }
+    if (m.armor === "分裂") { hp = Math.round(m.hp * 0.7); splitHp = Math.max(2, Math.round(m.hp * 0.15)); }
+    enemies.push(mk({ x, x0: x, y: -60, y0: -60, w: 92, h: 56, hp, shield, split: m.armor === "分裂", splitHp, amp: 44 }));
+  }
+}
+function spawnGate(s, now) {
+  if (s.type === "item") { const n = itemBonus(s.size, power); gates.push({ y: -52, left: ["+", n], right: ["+", n], item: true, applied: false, infoAt: now, lv: "easy" }); return; }
+  const g = resolveGate(s.spec, power);
+  gates.push({ y: -52, left: g.left, right: g.right, lv: g.lv, item: false, applied: false, hidden: s.deco === "hide", swap: s.deco === "swap", swapped: false, swapT: 0, infoAt: now, rnd: SIM ? simR() : Math.random() });
+}
 function spawnStep(now) {
-  if (!script || stepIdx >= script.length) { nextStepAt = now + 999999; return; }
-  const s = script[stepIdx];
-  if (s.type === "gate") gates.push({ y: -52, left: s.left, right: s.right, applied: false, item: false });
-  else if (s.type === "item") gates.push({ y: -52, left: s.op, right: s.op, applied: false, item: true });
-  else if (s.type === "pair") {
-    // 双线事件：怪先出（且走得慢，窗口更长），0.9 秒后门跟着落下——玩家要一边打怪一边抽空去穿门
-    const side = Math.random() < 0.5 ? "L" : "R";
-    const center = side === "L" ? W / 4 : W * 3 / 4;
-    enemies.push({ x: center + (Math.random() * 90 - 45), y: -60, w: 92, h: 56, hp: s.hp, maxHp: s.hp, shield: 0, split: false, mini: false, flash: 0, resolved: false, speedMul: 0.85 });
-    pendingSpawns.push({ at: now + 550, fn: () => gates.push({ y: -52, left: s.left, right: s.right, applied: false, item: false }) });
-  }
-  else {
-    const side = Math.random() < 0.5 ? "L" : "R";
-    const center = side === "L" ? W / 4 : W * 3 / 4;
-    enemies.push({ x: center + (Math.random() * 90 - 45), y: -60, w: 92, h: 56, hp: s.hp, maxHp: s.hp, shield: s.shield || 0, split: !!s.split, splitHp: s.splitHp || 0, mini: false, flash: 0, resolved: false });
-  }
-  const wait = (s.type === "enemy" || s.type === "pair") ? 2800 : 1500;
-  nextStepAt = now + wait; stepIdx++;
+  const s = plan[stepIdx], no = stepIdx;
+  if (s.type === "gate" || s.type === "item") spawnGate(s, now);
+  else if (s.type === "pair") { spawnMonster(s.mon, now, no); pendingSpawns.push({ at: now + 550 / spd(), fn: t => spawnGate(s, t) }); }
+  else spawnMonster(s.mon, now, no);
+  nextStepAt = now + s.wait / spd();
+  stepIdx++;
 }
 
-function loop(now) {
-  if (!running) return;
-  const dt = Math.min(0.05, lastFrame ? (now - lastFrame) / 1000 : 1 / 60); lastFrame = now;
+// ===== 一帧的规则（真人玩和机器人试玩走的是同一段）=====
+function end(win) { if (SIM) { running = false; simWin = win; } else finish(win); }
+function tick(now) {
+  const dt = Math.min(0.05, lastFrame ? (now - lastFrame) / 1000 : 1 / 60);
+  lastFrame = now;
   const elapsed = (now - startTime) / 1000;
-  document.getElementById("time").textContent = Math.floor(elapsed);
-  document.getElementById("prog").style.width = Math.min(100, elapsed / GAME_LEN * 100) + "%";
-  document.getElementById("streams").textContent = streamsOf(power);
-  if (elapsed >= GAME_LEN) return finish(true);
-  // 剧本打完且场上清空 = 提前通关，不陪 90 秒空转（孩子的关卡长短不一，以剧本走完为准，90 秒只是上限）
-  if (script && stepIdx >= script.length && enemies.length === 0 && gates.length === 0 && pendingSpawns.length === 0 && elapsed > 3) return finish(true);
-  while (pendingSpawns.length && now >= pendingSpawns[0].at) pendingSpawns.shift().fn();
-  if (now >= nextStepAt) {
-    const s = script && script[stepIdx];
-    if (s) {
-      const gatePending = gates.some(g => !g.applied);
-      const enemyBlocked = (s.type === "enemy" || s.type === "pair") && (gatePending || (elapsed < 32 && enemies.length > 0));
-      const gateBlocked = (s.type === "gate" || s.type === "item") && (enemies.length > 0 || gatePending);
-      if (!enemyBlocked && !gateBlocked) spawnStep(now);
-    }
+  if (elapsed >= 240 || (stepIdx >= plan.length && !enemies.length && !gates.some(g => !g.applied) && !pendingSpawns.length)) return end(true);
+  while (pendingSpawns.length && now >= pendingSpawns[0].at) pendingSpawns.shift().fn(now);
+  if (now >= nextStepAt && stepIdx < plan.length) {
+    // 出场纪律：除了专门写的「同刻」，门和怪永远一样一样来
+    if (!enemies.length && !gates.some(g => !g.applied) && !pendingSpawns.length) spawnStep(now);
   }
-  const scroll = 117 * dt;
   px += (targetX - px) * (1 - Math.pow(0.65, dt * 60));
-  if (now - lastShot > 120) {
-    const n = streamsOf(power), dmg = dmgOf(power);
-    const spread = Math.min(88, (n - 1) * 15);
-    for (let i = 0; i < n; i++) { const off = n === 1 ? 0 : -spread / 2 + spread * (i / (n - 1)); bullets.push({ x: px + off, y: PLAYER_Y - 34, dmg }); }
-    lastShot = now;
+  if (now - lastShot >= 120) {
+    const n = streamsOf(power), dmg = dmgOf(power), spread = Math.min(88, (n - 1) * 15);
+    for (let i = 0; i < n; i++) bullets.push({ x: px + (n === 1 ? 0 : -spread / 2 + spread * (i / (n - 1))), y: PLAYER_Y - 34, dmg });
+    lastShot = Math.max(lastShot + 120, now - 120);
   }
   for (const b of bullets) b.y -= 540 * dt;
-  bullets = bullets.filter(b => b.y > -12);
-  for (const e of enemies) { e.y += scroll * (e.speedMul || 1); if (e.flash > 0) e.flash -= dt; }
-  for (const g of gates) g.y += 175 * dt;
-  for (const b of bullets) {
-    let hit = null;
-    for (const e of enemies) {
-      if (Math.abs(b.x - e.x) < e.w / 2 + 10 && b.y < e.y + e.h / 2 && b.y > e.y - e.h / 2) { if (!hit || e.y > hit.y) hit = e; }
+  for (const e of enemies) {
+    let v = 117 * e.speedMul * spd();
+    if (e.dash) {
+      // 冲刺：猛冲 0.35 秒、歇 0.5 秒，一冲一停地下来；平均下来和普通怪一样快，所以给的时间不变
+      const was = e.dashing; e.dashing = ((now - e.born) / 1000) % 0.85 < 0.35;
+      if (e.dashing && !was) sfx("dash");
+      v *= e.dashing ? 2.0 : 0.3;
     }
-    if (hit) {
-      let d = b.dmg; hit.flash = 0.05; b.y = -999;
-      if (hit.shield > 0) { const s = Math.min(hit.shield, d); hit.shield -= s; d -= s; }
-      hit.hp -= d;
-      if (hit.hp <= 0) {
-        kills++; document.getElementById("kills").textContent = kills;
-        if (hit.split && !hit.mini) {
-          for (const sgn of [-1, 1]) { const chp = Math.max(3, hit.splitHp || Math.round(hit.maxHp * 0.3)); enemies.push({ x: Math.max(40, Math.min(W - 40, hit.x + sgn * 44)), y: hit.y, w: 64, h: 44, hp: chp, maxHp: chp, shield: 0, split: false, mini: true, flash: 0, resolved: false }); }
-          addFloat(hit.x, hit.y, "分裂了！", "#ffd43b");
-        } else addFloat(hit.x, hit.y, "击破！", "#51cf66");
-        enemies = enemies.filter(e => e !== hit);
-      }
+    e.y += v * dt;
+    if (e.move === "sway") { const nx = e.x0 + e.amp * Math.sin((now - e.born) / 1000 * 2.6 + e.phase); e.vx = (nx - e.x) / dt; e.x = nx; }
+    if (e.flash > 0) e.flash -= dt; if (e.sq > 0) e.sq -= dt;
+  }
+  for (const g of gates) {
+    g.y += 175 * dt * spd();
+    if (g.applied || g.item) continue;
+    const tta = (PLAYER_Y - 56 - g.y) / (175 * spd());
+    if (g.hidden && tta <= REVEAL_T) { g.hidden = false; g.infoAt = now; sfx("flip"); }
+    if (g.swap && !g.swapped && tta <= SWAP_T) { const t = g.left; g.left = g.right; g.right = t; g.swapped = true; g.swapT = now; g.infoAt = now; sfx("flip"); }
+  }
+  for (const b of bullets) {
+    if (b.y < -12) continue;
+    let hit = null;
+    for (const e of enemies) if (Math.abs(b.x - e.x) < e.w / 2 + 10 && b.y < e.y + e.h / 2 && b.y > e.y - e.h / 2) { if (!hit || e.y > hit.y) hit = e; }
+    if (!hit) continue;
+    let d = b.dmg; b.y = -999;
+    if (hit.shield > 0) { const s = Math.min(hit.shield, d); hit.shield -= s; d -= s; }
+    hit.hp -= d; hit.flash = fxOn ? 0.09 : 0.05; if (fxOn && hit.sq <= 0) hit.sq = 0.10;
+    if (hit.hp <= 0) {
+      stat.used.push(Math.max(0, Math.min(1, (hit.y - hit.y0) / (PLAYER_Y - 12 - hit.h / 2 - hit.y0))));
+      kills++; ui("kills", kills); enemies = enemies.filter(e => e !== hit);
+      if (hit.split) {
+        for (const sgn of [-1, 1]) {
+          const x = Math.max(40, Math.min(W - 40, hit.x + sgn * 44));
+          enemies.push({ x, x0: x, y: hit.y, y0: hit.y0, w: 64, h: 44, hp: hit.splitHp, shield: 0, split: false, splitHp: 0, mini: true, boss: false, flash: 0, sq: 0, resolved: false, born: hit.born,
+            move: "straight", phase: 0, amp: 0, speedMul: hit.speedMul, vx: 0, step: hit.step, dash: false, dashing: false, aimErr: SIM ? (simR() * 2 - 1) * BOT.err : 0 });
+        }
+        addFloat(hit.x, hit.y - 44, "分裂了！", "#ffd43b");
+      } else addFloat(hit.x, hit.y, "击破！", "#51cf66");
+      burst(hit.x, hit.y, hit.mini ? 8 : 14, 250); sfx("kill");
     }
   }
-  bullets = bullets.filter(b => b.y > -100);
+  bullets = bullets.filter(b => b.y > -12);
   for (const g of gates) {
-    if (!g.applied && g.y + 46 >= PLAYER_Y - 10) {
-      g.applied = true;
-      const op = px < W / 2 ? g.left : g.right, before = power;
-      power = applyOp(power, op);
-      document.getElementById("power").textContent = fmt(power);
-      addFloat(px, PLAYER_Y - 82, opLabel(op) + " → " + fmt(power), power >= before ? "#51cf66" : "#ff8787");
-      if (power <= 0) return finish(false);
-    }
+    if (g.applied || g.y + 46 < PLAYER_Y - 10) continue;
+    g.applied = true;
+    const before = power;
+    if (g.item) { power = applyOp(power, g.left); ui("power", fmt(power)); addFloat(px, PLAYER_Y - 82, "🎁 " + opLabel(g.left) + " → " + fmt(power), "#ffd43b"); sfx("good"); continue; }
+    const mine = px < W / 2 ? g.left : g.right, other = px < W / 2 ? g.right : g.left;
+    power = applyOp(power, mine); ui("power", fmt(power));
+    const otherResult = applyOp(before, other);
+    stat.gates++;
+    if (power >= otherResult) { stat.right++; addFloat(px, PLAYER_Y - 82, opLabel(mine) + " → " + fmt(power) + " ✓", "#51cf66"); sfx("good"); }
+    else { addFloat(px, PLAYER_Y - 82, opLabel(mine) + " → " + fmt(power) + "　另一边是 " + fmt(otherResult), "#ffd43b", 1.6); sfx("bad"); }
   }
   gates = gates.filter(g => g.y < H + 60);
   for (const e of enemies) {
-    if (!e.resolved && e.y + e.h / 2 >= PLAYER_Y - 12) {
-      e.resolved = true;
-      const bite = e.hp + e.shield;
-      power -= bite;
-      document.getElementById("power").textContent = fmt(Math.max(0, power));
-      addFloat(px, PLAYER_Y - 82, "被冲过去 -" + fmt(bite), "#ff8787");
-      e.y = H + 200;
-      if (power <= 0) return finish(false);
-    }
+    if (e.resolved || e.y + e.h / 2 < PLAYER_Y - 12) continue;
+    e.resolved = true;
+    const bite = Math.ceil(e.hp + e.shield);
+    stat.leaks++; if (firstLeak === null) firstLeak = e.step;
+    power -= bite; ui("power", fmt(Math.max(0, power)));
+    addFloat(px, PLAYER_Y - 82, "被冲过去 -" + fmt(bite), "#ff8787"); sfx("leak");
+    e.y = H + 200;
+    if (power <= 0) return end(false);
   }
   enemies = enemies.filter(e => e.y < H + 60);
+}
+function loop(now) {
+  if (!running) return;
+  tick(now);
+  if (!running) return;
+  const dt = 1 / 60;
+  $("time").textContent = Math.floor((now - startTime) / 1000);
+  $("prog").style.width = Math.min(100, stepIdx / Math.max(1, plan.length) * 100) + "%";
   for (const f of floats) { f.y -= 48 * dt; f.life -= dt; }
   floats = floats.filter(f => f.life > 0);
+  stepParticles(dt);
   draw(now);
   raf = requestAnimationFrame(loop);
 }
-function addFloat(x, y, text, color) { floats.push({ x, y, text, color, life: 0.9 }); }
-function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
-function drawGate(x, y, w, op, item) {
-  ctx.fillStyle = item ? "rgba(255,212,59,.85)" : (op[0] === "+" || op[0] === "×" ? "rgba(81,207,102,.85)" : "rgba(255,135,135,.85)");
-  rr(x + 3, y, w - 6, 46, 9); ctx.fill();
-  ctx.fillStyle = "#14161f"; ctx.font = "bold 21px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(opLabel(op), x + w / 2, y + 24);
+
+// ===== 试玩机器人 =====
+// 手：react 秒后才反应过来，对准有 ±err 像素的偏差，怪在动的时候总慢 lag 秒；有怪要打时，门到脚下前 lead 秒才肯离开去选门
+const HAND_KID = { react: 0.4, err: 15, lead: 0.5, lag: 0.12 };
+const KID_RIGHT = { easy: 0.95, normal: 0.8, hard: 0.6 };
+function botStep(now) {
+  const c = BOT; if (!c) return;
+  let te = null;
+  for (const e of enemies) { if (e.resolved || now - e.born < c.react * 1000) continue; if (!te || e.y > te.y) te = e; }
+  let tx = te ? te.x - (te.vx || 0) * c.lag + te.aimErr : null;
+  const g = gates.find(g => !g.applied);
+  if (g && !g.item) {
+    // 门上的字每变一次（刚出现、问号翻开、左右换位），都要过了反应时间才看得明白
+    if (!g.hidden && g.botInfo !== g.infoAt && now - g.infoAt >= c.react * 1000) {
+      g.botInfo = g.infoAt;
+      const best = applyOp(power, g.left) >= applyOp(power, g.right) ? "L" : "R", worst = best === "L" ? "R" : "L";
+      if (c.gate === "best") g.botSide = best;
+      else if (c.gate === "kid") g.botSide = g.rnd < KID_RIGHT[g.lv] ? best : worst;   // 认真的孩子：越纠结的门越容易错
+      else if (c.gate === "big") g.botSide = g.left[1] === g.right[1] ? (g.rnd < 0.5 ? "L" : "R") : g.left[1] > g.right[1] ? "L" : "R";   // 只挑数字大的
+      else if (c.gate === "mul" || c.gate === "add") {                                                                                   // 见乘就选乘 / 见加就选加，都没有就挑数字大的
+        const hi = c.gate === "mul" ? "×" : "+", lo = c.gate === "mul" ? "+" : "×", rank = op => op[0] === hi ? 3 : op[0] === lo ? 2 : 1, a = rank(g.left), b = rank(g.right);
+        g.botSide = a !== b ? (a > b ? "L" : "R") : a === 1 ? (g.rnd < 0.5 ? "L" : "R") : (g.left[1] >= g.right[1] ? "L" : "R");   // 两边都扣人就蒙一个
+      }
+      else g.botSide = g.rnd < 0.5 ? "L" : "R";
+    }
+    if (g.botSide) {
+      const gx = g.botSide === "L" ? W / 4 : W * 3 / 4, tta = (PLAYER_Y - 56 - g.y) / (175 * spd());
+      if (!te) tx = gx; else if (tta < c.lead && ((tx < W / 2) !== (g.botSide === "L"))) tx = gx;
+    }
+  }
+  if (tx !== null) targetX = Math.max(30, Math.min(W - 30, tx));
+}
+let SIM_FPS = 30;   // 试玩用每秒 30 帧算，比真人玩的 60 帧省一半时间，结果差不多
+function simulate(lv, hand, policy, seed) {
+  SIM = true; simR = rng32(seed); BOT = Object.assign({ gate: policy }, hand); simWin = null;
+  resetGame(lv, simR, 0); running = true;
+  let t = 0, frames = 0;
+  while (running && frames++ < 16000) { t += 1000 / SIM_FPS; botStep(t); tick(t); }
+  running = false; SIM = false; BOT = null;
+  return { win: simWin === true, firstLeak, leaks: stat.leaks, power, secs: t / 1000 };
+}
+// 装配时派机器人试玩，分三步：
+// 1) 定余量：从这个难度的下限起一档一档加厚怪的血，直到不动脑机器人基本过不了；
+// 2) 保底：全对机器人（每道门都选对、手像普通人）哪只怪老是打不掉，就把那只怪削一点，直到打得掉；
+// 3) 换一批没见过的局再考一次，把成绩写进报告。
+function setMargin(lv, m) { lv.margin = m; for (const s of lv.steps) if (s.mon) s.mon.hp = s.mon.hp0 = Math.max(4, Math.round(s.mon.base * m)); }
+function winsOf(lv, policy, n, seed0) { let w = 0, secs = 0; for (let k = 0; k < n; k++) { const r = simulate(lv, HAND_KID, policy, seed0 + k); if (r.win) w++; secs += r.secs / n; } return { w, secs }; }
+function soften(lv) {
+  for (let iter = 0; iter < 14; iter++) {
+    const first = {};
+    for (let k = 0; k < 16; k++) { const r = simulate(lv, HAND_KID, "best", 1000 + k); if (r.firstLeak !== null) first[r.firstLeak] = (first[r.firstLeak] || 0) + 1; }
+    const bad = Object.keys(first).filter(j => first[j] >= 2);
+    if (!bad.length) break;
+    for (const j of bad) { const mon = lv.steps[j].mon; mon.hp = Math.max(4, Math.round(mon.hp * 0.9)); }
+  }
+}
+// 不动脑的三种选法：乱选、见加就选加、见乘就选乘。取过关最多的那一种。（「只挑数字大的」比「见加就选加」更差，不用单独考）
+const LAZY = [["random", "乱选"], ["add", "见加就选加"], ["mul", "见乘就选乘"]];
+function lazyOf(lv, n, seed0) { let top = { w: -1 }; for (const [p, name] of LAZY) { const w = winsOf(lv, p, n, seed0).w; if (w > top.w) top = { w, name }; } return top; }
+function calibrate(lv) {
+  const tg = DIFF[lv.diffWord], N = 40, up = m => Math.round((m + 0.1) * 100) / 100;
+  let m = tg.lo;
+  for (; ; m = up(m)) {
+    setMargin(lv, m);
+    if (m >= tg.hi - 1e-9 || lazyOf(lv, 24, 3000).w / 24 <= tg.rnd - 0.03) break;
+  }
+  let best, kid, rnd;
+  for (let tries = 0; ; tries++) {
+    soften(lv);
+    best = winsOf(lv, "best", 16, 2000); kid = winsOf(lv, "kid", N, 4000); rnd = lazyOf(lv, N, 5000);
+    // 换了一批局，不动脑机器人还是过得太多：再加厚一档重来
+    if (tries >= 2 || m >= tg.hi - 1e-9 || rnd.w / N <= tg.rnd + 0.07) break;
+    m = up(m); setMargin(lv, m);
+  }
+  const softened = lv.steps.filter(s => s.mon && s.mon.hp < s.mon.hp0).map(s => "第 " + s.line + " 行（−" + Math.round((1 - s.mon.hp / s.mon.hp0) * 100) + "%）");
+  return { n: N, nBest: 16, best: best.w, kid: kid.w, random: rnd.w, lazyName: rnd.name, secs: best.secs, softened, target: tg.rnd };
+}
+// ===== 画面 =====
+function rr(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function drawGate(x, y, w, op, g) {
+  let fill, line, label = opLabel(op);
+  if (g.item) { fill = "rgba(255,212,59,.34)"; line = "#ffd43b"; label = "🎁 " + label; }
+  else if (g.hidden) { fill = "rgba(134,142,150,.34)"; line = "#ced4da"; label = "？"; }
+  else if (op[0] === "+" || op[0] === "×") { fill = "rgba(132,94,247,.34)"; line = "#b197fc"; }   // 颜色只分「加人」和「扣人」，不提前告诉你哪边更好
+  else { fill = "rgba(255,107,107,.30)"; line = "#ff6b6b"; }
+  ctx.fillStyle = fill; rr(x + 4, y, w - 8, 46, 10); ctx.fill();
+  ctx.strokeStyle = line; ctx.lineWidth = 2; rr(x + 4, y, w - 8, 46, 10); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.font = "bold 25px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(label, x + w / 2, y + 24);
 }
 function draw(now) {
+  const T = LV ? LV.theme : { monEmoji: "👾", bossEmoji: "👾", teamEmoji: "🤖" };
   ctx.clearRect(0, 0, W, H);
-  if (imgReady("bg")) { drawCover(skinImgs.bg, 0, 0, W, H); ctx.fillStyle = "rgba(20,22,31,.52)"; ctx.fillRect(0, 0, W, H); }
   ctx.fillStyle = "rgba(255,255,255,.05)"; ctx.fillRect(W / 2 - 1, 0, 2, H);
-  for (const g of gates) { drawGate(0, g.y, W / 2, g.left, g.item); drawGate(W / 2, g.y, W / 2, g.right, g.item); }
-  for (const e of enemies) {
-    ctx.fillStyle = e.flash > 0 ? "#ff8787" : "#845ef7";
-    rr(e.x - e.w / 2, e.y - e.h / 2, e.w, e.h, 12); ctx.fill();
-    if (e.resolved) ctx.globalAlpha = 0.45;
-    if (imgReady("mimg")) {
-      ctx.save(); ctx.beginPath(); ctx.arc(e.x, e.y, e.w * 0.34, 0, Math.PI * 2); ctx.clip();
-      drawCover(skinImgs.mimg, e.x - e.w * 0.34, e.y - e.w * 0.34, e.w * 0.68, e.w * 0.68); ctx.restore();
-    } else {
-      ctx.font = (e.mini ? 21 : 30) + "px serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
-      ctx.fillText(theme.emoji, e.x, e.y + 6);
+  ctx.fillStyle = "rgba(255,255,255,.30)"; ctx.font = "19px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  ctx.fillText("左半场", W / 4, 28); ctx.fillText("右半场", W * 3 / 4, 28);
+  for (const g of gates) {
+    if (g.item) { drawGate(0, g.y, W, g.left, g); continue; }
+    const k = g.swapped ? Math.min(1, (now - g.swapT) / 220) : 1;      // 换位时两扇门滑过去
+    drawGate((1 - k) * W / 2, g.y, W / 2, g.left, g); drawGate(W / 2 - (1 - k) * W / 2, g.y, W / 2, g.right, g);
+    if (g.swap && !g.swapped) {
+      ctx.fillStyle = "#ffd43b"; ctx.beginPath(); ctx.arc(W / 2, g.y + 23, 17, 0, 6.3); ctx.fill();
+      ctx.fillStyle = "#212529"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⇄", W / 2, g.y + 24);
     }
-    ctx.fillStyle = "#fff"; ctx.font = "bold " + (e.mini ? 20 : 27) + "px sans-serif"; ctx.textBaseline = "top";
-    ctx.fillText(fmt(Math.max(0, e.hp)), e.x, e.y - e.h / 2 + 2);
-    if (e.shield > 0) { ctx.fillStyle = "#66d9e8"; ctx.font = "bold 13px sans-serif"; ctx.fillText("🛡" + fmt(e.shield), e.x, e.y - e.h / 2 - 15); }
-    if (e.split && !e.mini) { ctx.fillStyle = "#ffd43b"; ctx.font = "bold 12px sans-serif"; ctx.fillText("分裂", e.x, e.y + e.h / 2 - 13); }
-    ctx.globalAlpha = 1;
   }
+  for (const e of enemies) {
+    const k = (fxOn && e.sq > 0) ? Math.max(0, e.sq / 0.10) : 0;
+    ctx.save();
+    ctx.translate(e.x, e.y); ctx.scale(1 + 0.26 * k, 1 - 0.26 * k);
+    if (e.dashing) { ctx.fillStyle = "rgba(255,169,77,.35)"; for (let i = 1; i <= 3; i++) rr(-e.w / 2 + 6, -e.h / 2 - i * 13, e.w - 12, 8, 4), ctx.fill(); }
+    ctx.fillStyle = e.flash > 0 ? (fxOn ? "#ffffff" : "#ff8787") : e.boss ? "#c2255c" : "#845ef7";
+    rr(-e.w / 2, -e.h / 2, e.w, e.h, 12); ctx.fill();
+    if (e.shield > 0) { ctx.strokeStyle = "#66d9e8"; ctx.lineWidth = 4; rr(-e.w / 2 - 3, -e.h / 2 - 3, e.w + 6, e.h + 6, 14); ctx.stroke(); }
+    ctx.font = (e.mini ? 22 : e.boss ? 40 : 32) + "px serif"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText(e.boss ? T.bossEmoji : T.monEmoji, 0, -e.h / 2 + 5);
+    ctx.restore();
+    ctx.fillStyle = "#fff"; ctx.font = "bold " + (e.mini ? 20 : 26) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.strokeStyle = "#241d3f"; ctx.lineWidth = 4; ctx.lineJoin = "round";
+    const topY = e.y - (e.h / 2) * (1 - 0.26 * k) + (e.mini ? 10 : 3), hpText = fmt(Math.max(0, e.hp));
+    ctx.strokeText(hpText, e.x, topY); ctx.fillText(hpText, e.x, topY);
+    if (!e.mini) {
+      const tag = (e.shield > 0 ? "🛡" + fmt(e.shield) + " " : "") + (e.split ? "分裂 " : "") + (e.dash ? "⚡" : "");
+      if (tag) { ctx.fillStyle = e.shield > 0 ? "#99e9f2" : "#ffe066"; ctx.font = "bold 14px sans-serif"; ctx.textBaseline = "bottom"; ctx.fillText(tag.trim(), e.x, e.y + e.h / 2 - 4); }
+    }
+  }
+  for (const p of particles) { ctx.globalAlpha = Math.max(0, p.life / p.max); ctx.fillStyle = p.c; ctx.fillRect(p.x - p.s / 2, p.y - p.s / 2, p.s, p.s); }
+  ctx.globalAlpha = 1;
   ctx.fillStyle = "#66d9e8";
   for (const b of bullets) ctx.fillRect(b.x - 2, b.y - 9, 4, 13);
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   const mates = Math.min(4, Math.floor(power / 8));
   ctx.font = "26px serif";
-  for (let i = 0; i < mates; i++) ctx.fillText("🧑", px + (i - (mates - 1) / 2) * 24, PLAYER_Y + 22);
-  if (imgReady("pimg")) {
-    ctx.save(); ctx.beginPath(); ctx.arc(px, PLAYER_Y, 19, 0, Math.PI * 2); ctx.clip();
-    drawCover(skinImgs.pimg, px - 19, PLAYER_Y - 19, 38, 38); ctx.restore();
-    ctx.strokeStyle = "#ffd43b"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, PLAYER_Y, 19, 0, Math.PI * 2); ctx.stroke();
-  } else { ctx.font = "32px serif"; ctx.fillText("🧑‍🚀", px, PLAYER_Y); }
-  const pwLabel = fmt(power);
-  ctx.font = "bold 19px sans-serif";
-  const pwW = ctx.measureText(pwLabel).width;
-  ctx.fillStyle = "#ffd43b";
-  rr(px - pwW / 2 - 9, PLAYER_Y - 41, pwW + 18, 30, 15); ctx.fill();
-  ctx.fillStyle = "#212529";
-  ctx.fillText(pwLabel, px, PLAYER_Y - 25);
-  ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = "12px sans-serif";
-  ctx.fillText(theme.sname, px, PLAYER_Y + 44);
-  for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life * 1.6); ctx.fillStyle = f.color; ctx.font = "bold 17px sans-serif"; ctx.fillText(f.text, f.x, f.y); ctx.globalAlpha = 1; }
+  for (let i = 0; i < mates; i++) ctx.fillText(T.teamEmoji, px + (i - (mates - 1) / 2) * 30, PLAYER_Y + 30);
+  ctx.font = "42px serif"; ctx.fillText(T.teamEmoji, px, PLAYER_Y);
+  const label = fmt(power);
+  ctx.font = "bold 20px sans-serif";
+  const lw = ctx.measureText(label).width;
+  ctx.fillStyle = "#ffd43b"; rr(px - lw / 2 - 10, PLAYER_Y - 63, lw + 20, 32, 16); ctx.fill();
+  ctx.fillStyle = "#212529"; ctx.fillText(label, px, PLAYER_Y - 46);
+  for (const f of floats) { ctx.globalAlpha = Math.min(1, f.life / 0.5); ctx.fillStyle = f.color; ctx.font = "bold 19px sans-serif"; ctx.fillText(f.text, f.x, f.y); ctx.globalAlpha = 1; }
 }
+
 function finish(win) {
-  running = false; if (raf) cancelAnimationFrame(raf);
-  const used = Math.floor((performance.now() - startTime) / 1000);
-  document.getElementById("endmsg").textContent = win ? "🏁 " + theme.win + "（用时 " + used + " 秒，最终人数 " + fmt(power) + "，击破 " + kills + " 只" + theme.mname + "）" : "💥 " + theme.fail;
-  draw(performance.now());
+  running = false; draw(performance.now());
+  if (win) { sfx("win"); confetti(); celebrate(); } else sfx("lose");
+  const T = LV.theme;
+  if (win) {
+    const q = Math.min(1, power / IDEAL_FINAL), stars = q >= 0.9 ? "★★★" : q >= 0.6 ? "★★☆" : "★☆☆";
+    $("msg").textContent = "🏁 " + T.win + " " + stars + "　人数 " + fmt(power) + "，是满分路线的 " + Math.round(q * 100) + "%";
+  } else $("msg").textContent = "💥 " + T.lose + "（走到第 " + stepIdx + " / " + plan.length + " 步）";
+  const u = stat.used, worst = u.length ? Math.round(Math.max.apply(null, u) * 100) : 0, avg = u.length ? Math.round(u.reduce((a, b) => a + b, 0) / u.length * 100) : 0;
+  $("sub").textContent = "门选对 " + stat.right + " / " + stat.gates + "，漏怪 " + stat.leaks + " 只，打掉的怪平均走了 " + avg + "% 的路，最险的一只走了 " + worst + "%";
+  $("btn").textContent = "再来一局";
 }
+
+// ===== 装配 =====
+function stopGame() { running = false; if (raf) cancelAnimationFrame(raf); raf = null; }
+function assembleNow() {
+  stopGame();
+  const res = buildLevel(parseLevel($("level").value));
+  let html = "";
+  if (res.errors.length) {
+    LV = null;
+    html = '<div class="err"><b>还装不上，有 ' + res.errors.length + " 处要改：</b></div>" + res.errors.map(e => '<div class="err">✗ ' + esc(e) + "</div>").join("");
+    $("msg").textContent = "关卡还没装上，看左边哪里要改";
+  } else {
+    const c = calibrate(res.lv);
+    if (c.best < c.nBest - 1) {
+      LV = null;
+      html = '<div class="err">✗ 这一关连全对机器人（每道门都选对）也只能 ' + c.nBest + " 局过 " + c.best + " 局，太难了。少放几个「对面」「问号」「换位」，或者把速度调慢一档再试。</div>";
+      $("msg").textContent = "关卡还没装上，看左边哪里要改";
+    } else {
+      LV = res.lv;
+      html = '<div class="ok"><b>✅ 装好了！</b>一共 ' + LV.steps.length + " 步，一局大约 " + Math.round(c.secs) + " 秒，全选对到终点有 " + fmt(LV.idealFinal) + " 人。</div>"
+        + '<div class="info">三个机器人替你试玩过了：</div>'
+        + '<div class="info">🤖 全对机器人（每道门都选对）' + c.nBest + " 局过 " + c.best + " 局</div>"
+        + '<div class="info">🙂 认真机器人（简单的门几乎不错，纠结的门会错一些）' + c.n + " 局过 " + c.kid + " 局</div>"
+        + '<div class="info">🎲 不动脑机器人（乱选、见加就选加、见乘就选乘，三种里最好的是「' + c.lazyName + "」）" + c.n + " 局过 " + c.random + " 局</div>";
+      if (c.softened.length) html += '<div class="info">🔧 有几只怪全对机器人也老是打不掉，网页帮你削了一点：' + c.softened.join("、") + "</div>";
+      if (c.random / c.n > c.target + 0.12) res.warns.push("「" + c.lazyName + "」也常常能过，说明这一关不动脑子也能通关。「纠结」的门选错了亏得很少，换几道成「普通」或「好坏门」，或者多加几步，选错才会疼。");
+      if (c.kid / c.n < 0.6) res.warns.push("认真机器人也常常过不了。为了不让乱选的人蒙过去，网页只好把怪加得很厚。把几道「纠结」换成「普通」，网页就不用加这么厚了。");
+      html += res.warns.map(w => '<div class="warn">⚠ ' + esc(w) + "</div>").join("");
+      const T = LV.theme;
+      $("title").textContent = "🚀 " + T.title; $("team").textContent = T.teamEmoji + " " + T.team;
+      $("msg").textContent = "装好了，点「开始游戏」";
+    }
+  }
+  $("report").innerHTML = html;
+  $("sub").textContent = ""; $("btn").textContent = "开始游戏";
+  power = 3; enemies = []; gates = []; bullets = []; floats = []; particles = []; px = W / 2; $("power").textContent = "3"; $("kills").textContent = "0"; $("time").textContent = "0"; $("prog").style.width = "0%";
+  draw(0);
+}
+$("b_build").onclick = () => { stopGame(); $("report").innerHTML = '<div class="info">🤖 机器人正在试玩你的关卡……</div>'; setTimeout(assembleNow, 30); };
+
 function startGame() {
-  if (!script) { document.getElementById("endmsg").textContent = "先在左边装配一个关卡！"; return; }
-  power = 3; kills = 0; bullets = []; enemies = []; gates = []; floats = []; pendingSpawns = [];
-  px = targetX = W / 2; stepIdx = 0; lastShot = 0; lastFrame = 0;
-  document.getElementById("power").textContent = "3";
-  document.getElementById("kills").textContent = "0";
-  document.getElementById("endmsg").textContent = "";
-  running = true; startTime = performance.now(); nextStepAt = startTime + 500;
+  if (!LV) { $("msg").textContent = "先点左边的「装上我的关卡」"; return; }
+  stopGame();
+  resetGame(LV, Math.random, performance.now());
+  $("power").textContent = "3"; $("kills").textContent = "0"; $("time").textContent = "0"; $("msg").textContent = ""; $("sub").textContent = "";
+  $("btn").textContent = "重新开始";
+  initAudio(); running = true;
   raf = requestAnimationFrame(loop);
 }
-cv.addEventListener("pointermove", e => { const r = cv.getBoundingClientRect(); targetX = Math.max(24, Math.min(W - 24, (e.clientX - r.left) * W / r.width)); });
-cv.addEventListener("pointerdown", e => { const r = cv.getBoundingClientRect(); targetX = Math.max(24, Math.min(W - 24, (e.clientX - r.left) * W / r.width)); });
-document.getElementById("b_start").onclick = startGame;
+$("btn").onclick = startGame;
+function move(clientX) { const r = cv.getBoundingClientRect(); targetX = Math.max(30, Math.min(W - 30, (clientX - r.left) * (W / r.width))); }
+cv.addEventListener("pointermove", e => move(e.clientX));
+cv.addEventListener("pointerdown", e => move(e.clientX));
+$("fxBtn").onclick = () => { fxOn = !fxOn; $("fxBtn").textContent = fxOn ? "✨ 效果：开" : "✨ 效果：关"; if (!fxOn) particles = []; };
+$("sndBtn").onclick = () => { sndOn = !sndOn; $("sndBtn").textContent = sndOn ? "🔊 声音：开" : "🔇 声音：关"; };
 
-// —— 装配 / 预设 / 分享 ——
-const PRESETS = {
-  orig: { theme: null, text:
-`门：左 +5 ｜ 右 ×2
+// ===== 三份样例 =====
+const SAMPLES = {
+  first: `标题：数字门大冒险
+怪名：数字怪
+怪样：👾
+队名：机器人小队
+胜句：第一关过啦！
+败句：差一点点，再来一局！
+速度：正常
+难度：正常
+编号：1
+
+门：送分
 怪：强度 弱
-怪：强度 弱
-门：左 +6 ｜ 右 ×2
+怪：强度 弱 ｜ 三只
+门：送分
 怪：强度 中
-门：左 ×2 ｜ 右 -4
-怪：强度 中
-门：左 +12 ｜ 右 ×2
-怪：强度 中
-门：左 ÷2 ｜ 右 +18
-怪：强度 强
-门：左 ×3 ｜ 右 +25
-怪：强度 强
-门：左 +40 ｜ 右 ×2
-怪：强度 Boss
-门：左 -15 ｜ 右 ×2
-怪：强度 Boss
-门：左 ×2 ｜ 右 +80
-怪：强度 Boss
-门：左 +150 ｜ 右 ×2` },
-  canteen: { theme: { title: "食堂大战", emoji: "🍔", mname: "挑食怪", sname: "干饭小队", win: "全班都吃饱啦！", fail: "挑食怪把饭菜打翻了……" }, text:
-`门：左 +5 ｜ 右 ×2
-怪：强度 弱
-怪：强度 弱 ｜ 分裂
-门：左 +6 ｜ 右 ×2
-怪：强度 中
-道具门：+10
-门：左 ×2 ｜ 右 -6
-怪：强度 中 ｜ 护盾
-门：左 +15 ｜ 右 ×2
-怪：强度 强
-门：左 ÷2 ｜ 右 -10
+门：普通 ｜ 问号
+怪：强度 中 ｜ 晃
+门：好坏门
+怪：强度 中 ｜ 对面
+道具门：小
+怪：强度 强 ｜ 冲刺
+同刻：怪 强度 强 ｜ 门 普通
+门：坑门
+怪：强度 强 ｜ 护盾
+门：普通 ｜ 换位
 怪：强度 强 ｜ 分裂
-门：左 ×3 ｜ 右 +30
-怪：强度 Boss ｜ 护盾
-门：左 -20 ｜ 右 ×2
+门：纠结
 怪：强度 Boss
-门：左 ×2 ｜ 右 +100` },
-  crazy: { theme: null, text:
-`门：左 +5 ｜ 右 ×2
-怪：强度 Boss
-怪：强度 200%
-门：左 +6 ｜ 右 ×2
-怪：强度 200%
-怪：强度 200%
-门：左 ×2 ｜ 右 -4
-怪：强度 200%
-怪：强度 200%
-门：左 +12 ｜ 右 ×2
-怪：强度 200%
-怪：强度 200%
-门：左 ×2 ｜ 右 +30` },
-  duo: { theme: null, text:
-`门：左 +5 ｜ 右 ×2
+门：纠结
+怪：强度 Boss ｜ 带小怪`,
+  base: `标题：数字门大冒险
+怪名：数字怪
+怪样：👾
+队名：机器人小队
+胜句：到达终点！
+败句：人数被耗光啦……
+
+门：送分
 怪：强度 弱
 怪：强度 弱
-门：左 +6 ｜ 右 ×2
+门：送分
 怪：强度 中
-门：左 ×2 ｜ 右 -4
+门：好坏门
 怪：强度 中
-门：左 +12 ｜ 右 ×2
+门：普通
 怪：强度 中
-门：左 ÷2 ｜ 右 +18
+门：坑门
 怪：强度 强
-同刻：怪 强度 强 ｜ 门 左 +40 ｜ 右 ×2
-门：左 ×3 ｜ 右 +25
-同刻：怪 强度 强 ｜ 门 左 ÷2 ｜ 右 +30
+门：普通
 怪：强度 强
-门：左 +40 ｜ 右 ×2
-同刻：怪 强度 Boss ｜ 门 左 -15 ｜ 右 ×2
+门：纠结
 怪：强度 Boss
-同刻：怪 强度 Boss ｜ 门 左 ×2 ｜ 右 +80
-门：左 +150 ｜ 右 ×2
+门：好坏门
 怪：强度 Boss
-门：左 ×2 ｜ 右 +200` },
+门：纠结
+怪：强度 Boss
+门：纠结`,
+  trap: `标题：章鱼哥的海底迷宫
+怪名：章鱼哥
+怪样：🐙
+Boss名：喷火龙
+Boss样：🐲
+队名：泡泡小队
+队样：🐠
+胜句：我是屠龙勇士！
+败句：被墨汁喷了一脸……
+速度：快
+难度：正常
+
+门：送分
+怪：强度 弱
+门：普通
+怪：强度 中 ｜ 对面
+门：普通 ｜ 问号
+怪：强度 中
+门：好坏门
+怪：强度 中 ｜ 冲刺
+门：普通
+怪：强度 强 ｜ 对面
+同刻：怪 强度 强 ｜ 门 普通
+门：坑门
+怪：强度 强 ｜ 晃
+门：普通 ｜ 换位
+怪：强度 强 ｜ 对面
+门：纠结
+怪：强度 Boss ｜ 对面
+同刻：怪 强度 Boss ｜ 门 普通 ｜ 问号
+门：好坏门 ｜ 换位
+怪：强度 Boss ｜ 带小怪`,
+  parts: `标题：食堂大作战
+怪名：饿鬼
+怪样：👻
+Boss名：大胃王
+Boss样：👹
+队名：干饭小队
+队样：🍚
+胜句：光盘行动成功！
+败句：饭被抢光了……
+速度：正常
+难度：轻松
+
+门：送分
+怪：强度 弱
+道具门：小
+怪：强度 弱 ｜ 三只
+门：普通
+怪：强度 中 ｜ 分裂
+门：普通
+怪：强度 中 ｜ 晃
+门：好坏门
+怪：强度 强 ｜ 冲刺
+门：普通
+怪：强度 强 ｜ 护盾
+道具门：大
+怪：强度 强 ｜ 三只 ｜ 晃
+门：普通
+怪：强度 Boss ｜ 分裂
+门：纠结
+怪：强度 Boss ｜ 带小怪 ｜ 护盾`,
 };
-function readTheme() {
-  return { title: document.getElementById("t_title").value || "激光数字门", emoji: document.getElementById("t_emoji").value || "👾", mname: document.getElementById("t_mname").value || "数字怪", sname: document.getElementById("t_sname").value || "激光小队", win: document.getElementById("t_win").value || "到达终点！", fail: document.getElementById("t_fail").value || "小队被冲散了……", bg: document.getElementById("t_bg").value.trim(), mimg: document.getElementById("t_mimg").value.trim(), pimg: document.getElementById("t_pimg").value.trim() };
+function loadSample(id) { $("level").value = SAMPLES[id]; }
+for (const id in SAMPLES) $("s_" + id).onclick = () => { loadSample(id); $("b_build").onclick(); };
+loadSample("base");
+assembleNow();
+
+
+// ===== 分享：关卡码 / 关卡链接（词表版：主题就在文件里，码里只装文件全文）=====
+function encodeLevelText(text) {
+  const bytes = new TextEncoder().encode(text);
+  let bin = ""; for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+  return btoa(bin);
 }
-function writeTheme(t) {
-  if (!t) return;
-  document.getElementById("t_title").value = t.title || ""; document.getElementById("t_emoji").value = t.emoji || "";
-  document.getElementById("t_mname").value = t.mname || ""; document.getElementById("t_sname").value = t.sname || "";
-  document.getElementById("t_win").value = t.win || ""; document.getElementById("t_fail").value = t.fail || "";
-  document.getElementById("t_bg").value = t.bg || ""; document.getElementById("t_mimg").value = t.mimg || ""; document.getElementById("t_pimg").value = t.pimg || "";
+function decodeLevelText(code) {
+  const bin = atob(String(code).trim());
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
-function doBuild(sandbox) {
-  const parsed = parseLevel(document.getElementById("level").value);
-  // 文件头部的主题行（标题：/怪名：等）优先：工程师把主题和剧本写在一个文件里交回来
-  const tmap = { title: "t_title", emoji: "t_emoji", mname: "t_mname", sname: "t_sname", win: "t_win", fail: "t_fail" };
-  for (const k in (parsed.theme || {})) if (tmap[k]) document.getElementById(tmap[k]).value = parsed.theme[k];
-  theme = readTheme(); loadSkin();
-  document.getElementById("gametitle").textContent = theme.title;
-  const r = buildLevel(parsed, sandbox);
-  const rep = document.getElementById("report");
-  if (r.ok) {
-    script = r.script;
-    let html = '<span class="ok">✔ 装配成功' + (sandbox ? "（沙盒模式：放开了限制，后果真实）" : "") + '</span>\n全选对路线：最终 ' + fmt(r.optFinal) + ' 人；全选错路线：会漏 ' + r.worstLeaks + ' 只怪。';
-    if (r.warnings.length) html += '\n<span class="soft">提醒（可以不听）：</span>\n' + r.warnings.map(w => "· " + w).join("\n");
-    rep.innerHTML = html;
-  } else {
-    script = null;
-    let html = sandbox
-      ? '<span class="err">✘ 沙盒也没能装上：</span>沙盒只放开数字和强度，下面这几条还是不行：\n'
-      : '<span class="err">✘ 装配被拦下了：</span>\n';
-    html += r.errors.map(e => "· " + e).join("\n");
-    if (r.hasParseErrors) html += '\n<span class="soft">提醒：有行没读懂，后面的门是按"缺了那一行"算的，可能冤枉了后面的行——先把没读懂的行改对，再点一次。</span>';
-    html += '\n把这几句原样发给工程师，它会改好再给你。';
-    rep.innerHTML = html;
-  }
-  draw(performance.now());
+function copyField(id, btn) {
+  const el = $(id); if (!el || !el.value) return;
+  const done = () => { const old = btn.dataset.label || btn.textContent; btn.dataset.label = old; btn.textContent = "✓ 已复制"; setTimeout(() => btn.textContent = old, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(el.value).then(done).catch(() => { el.focus(); el.select(); document.execCommand("copy"); done(); });
+  else { el.focus(); el.select(); document.execCommand("copy"); done(); }
 }
-document.getElementById("b_build").onclick = () => doBuild(false);
-document.getElementById("b_sandbox").onclick = () => doBuild(true);
-document.getElementById("b_reset").onclick = () => { setPreset("orig"); doBuild(false); };
-function setPreset(k) { const p = PRESETS[k]; document.getElementById("level").value = p.text; if (p.theme) writeTheme(p.theme); }
-document.getElementById("b_preset1").onclick = () => setPreset("orig");
-document.getElementById("b_preset2").onclick = () => setPreset("canteen");
-document.getElementById("b_preset3").onclick = () => setPreset("crazy");
-document.getElementById("b_preset4").onclick = () => setPreset("duo");
-function encodePayload() {
-  const payload = JSON.stringify({ t: readTheme(), l: document.getElementById("level").value });
-  return btoa(unescape(encodeURIComponent(payload)));
-}
-async function copyField(id, btn) {
-  const el = document.getElementById(id);
-  if (!el.value) { const o = btn.textContent; btn.textContent = "先点上面的生成"; setTimeout(() => btn.textContent = o, 1600); return; }
-  try { await navigator.clipboard.writeText(el.value); }
-  catch (e) { el.focus(); el.select(); document.execCommand("copy"); }
-  const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
-  btn.textContent = "✓ 已复制"; setTimeout(() => btn.textContent = old, 1600);
-}
-document.getElementById("b_copycode").onclick = e => copyField("shareout", e.currentTarget);
-document.getElementById("b_copylink").onclick = e => copyField("linkout", e.currentTarget);
-document.getElementById("b_code").onclick = () => {
-  if (!script) { document.getElementById("report").innerHTML = '<span class="err">先装配成功，才能生成分享。</span>'; return; }
-  const code = encodePayload();
-  document.getElementById("shareout").value = code;
-  document.getElementById("linkout").value = location.href.split("#")[0] + "#" + code;
+$("b_code").onclick = () => {
+  if (!LV) { $("msg").textContent = "先把关卡装好，才能生成关卡码"; return; }
+  const code = encodeLevelText($("level").value);
+  $("shareout").value = code;
+  $("linkout").value = location.href.split("#")[0] + "#lv=" + code;
+  $("msg").textContent = "关卡码生成好啦，发给同伴吧";
 };
-document.getElementById("b_import").onclick = () => {
+$("b_copycode").onclick = e => copyField("shareout", e.currentTarget);
+$("b_copylink").onclick = e => copyField("linkout", e.currentTarget);
+$("b_import").onclick = () => {
   try {
-    const payload = JSON.parse(decodeURIComponent(escape(atob(document.getElementById("sharein").value.trim()))));
-    writeTheme(payload.t); document.getElementById("level").value = payload.l; doBuild(false);
-  } catch (e) { document.getElementById("report").innerHTML = '<span class="err">这个关卡码读不出来，检查一下是不是没复制全。</span>'; }
+    $("level").value = decodeLevelText($("sharein").value);
+    assembleNow();
+    if (LV) $("msg").textContent = "同伴的关卡装好啦，点开始游戏试试";
+  } catch (e) { $("msg").textContent = "这个关卡码读不出来，检查一下是不是没复制全"; }
 };
-// 初始化：装配原版；若链接带 #关卡码 则导入
-setPreset("orig"); doBuild(false);
-if (location.hash.length > 10) {
-  try { const payload = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1))))); writeTheme(payload.t); document.getElementById("level").value = payload.l; doBuild(false); } catch (e) {}
+// 打开分享链接（#lv=关卡码）时，直接装上那一关
+let sharedImported = false;
+if (typeof location !== "undefined" && location.hash.indexOf("#lv=") === 0) {
+  try { $("level").value = decodeLevelText(location.hash.slice(4)); assembleNow(); sharedImported = !!LV; if (sharedImported) $("msg").textContent = "这是同伴分享的关卡，点开始游戏试试"; } catch (e) {}
 }
-draw(performance.now());
+
+// 自检截图用：网址后面加 #trap 直接装上那份样例，再加 auto 自动开局，再加 ff=20 让机器人打 20 秒后停在那一帧
+if (!sharedImported && typeof location !== "undefined" && location.hash) {
+  const m = location.hash.match(/^#(first|base|trap|parts)\b/);
+  if (m) { loadSample(m[1]); assembleNow(); }
+  const ff = location.hash.match(/ff=(\d+)/);
+  if (/auto/.test(location.hash) && LV) {
+    startGame();
+    if (ff) {
+      if (raf) cancelAnimationFrame(raf);
+      BOT = { gate: "best", react: 0.15, err: 0, lead: 0.4, lag: 0 };
+      let t = startTime;
+      const un = (location.hash.match(/until=(\w+)/) || [])[1];   // until=hide 之类：打到屏幕上出现这种零件就停，截图检查用
+      const seen = { hide: () => gates.some(g => g.hidden && g.y > 150), swap: () => gates.some(g => g.swap && !g.swapped && g.y > 150), swapped: () => gates.some(g => g.swapped && !g.applied && t - g.swapT > 90),
+        escort: () => enemies.length >= 3 && enemies.some(e => e.boss && e.y > 10), shield: () => enemies.some(e => e.shield > 0 && e.y > 120), split: () => enemies.some(e => e.split && e.y > 120),
+        kids: () => enemies.length === 2 && enemies.every(e => e.mini && e.y0 === -60 && e.amp === 0), dash: () => enemies.some(e => e.dashing && e.y > 170), trio: () => enemies.length === 3 && enemies.every(e => e.mini) && enemies[0].y > 120 };
+      for (let i = 0; i < +ff[1] * 60 && running; i++) { t += 1000 / 60; botStep(t); loop(t); if (un && seen[un] && seen[un]()) break; }
+      if (raf) cancelAnimationFrame(raf);
+      BOT = null; if (running) { running = false; draw(t); }
+    }
+  }
+}
 </script>
 </body>
 </html>

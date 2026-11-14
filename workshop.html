@@ -923,9 +923,17 @@ $("b_copycode").onclick = e => copyField("shareout", e.currentTarget);
 $("b_copylink").onclick = e => copyField("linkout", e.currentTarget);
 $("b_import").onclick = () => {
   try {
-    $("level").value = decodeLevelText($("sharein").value);
+    const prevText = $("level").value;
+    const text = decodeLevelText($("sharein").value);
+    $("level").value = text;
     assembleNow();
-    if (LV) $("msg").textContent = "同伴的关卡装好啦，点开始游戏试试";
+    if (LV) {
+      $("msg").textContent = "同伴的关卡装好啦，点开始游戏试试";
+      const titleLine = (text.split("\n").find(l => l.trim().startsWith("标题")) || "").trim();
+      $("report").innerHTML = '<div class="ok">📥 同伴的关卡装好啦' + (titleLine ? "：" + esc(titleLine) : "") + (prevText.trim() === text.trim() ? "（和你刚才那关是同一关）" : "") + '。点右边橙色的「开始游戏」就能玩。</div>' + $("report").innerHTML;
+      const stage = $("btn").closest(".stage");
+      if (stage && stage.scrollIntoView) setTimeout(() => stage.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    }
   } catch (e) { $("msg").textContent = "这个关卡码读不出来，检查一下是不是没复制全"; }
 };
 // 打开分享链接（#lv=关卡码）时，直接装上那一关

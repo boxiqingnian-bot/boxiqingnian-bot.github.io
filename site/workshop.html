@@ -63,8 +63,8 @@
     <div class="row"><button class="main" id="b_code" style="flex:1">生成我的关卡码</button></div>
     <label>关卡码（把这串字复制，发到聊天里给同伴）</label>
     <textarea class="share" id="shareout" readonly spellcheck="false"></textarea>
-    <div class="row"><button id="b_copycode">📋 复制关卡码</button><button id="b_copylink">📋 复制关卡链接</button></div>
-    <label>我的关卡链接（同伴点开就能玩这一关）</label>
+    <div class="row"><button id="b_copycode">📋 复制关卡码</button><button id="b_copylink">📋 复制游戏链接</button></div>
+    <label>我的游戏链接（同伴点开就能玩这一关）</label>
     <input class="share" type="text" id="linkout" readonly>
     <label>玩同伴的关卡：把他的关卡码粘在这里</label>
     <textarea class="sharein" id="sharein" spellcheck="false"></textarea>
@@ -928,7 +928,7 @@ loadSample("base");
 assembleNow();
 
 
-// ===== 分享：关卡码 / 关卡链接（词表版：主题就在文件里，码里只装文件全文）=====
+// ===== 分享：关卡码 / 游戏链接（词表版：主题就在文件里，码里只装文件全文）=====
 function encodeLevelText(text) {
   const bytes = new TextEncoder().encode(text);
   let bin = ""; for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));

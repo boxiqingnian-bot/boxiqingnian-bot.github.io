@@ -6,39 +6,48 @@
 <title>数字门大冒险 · 工坊试玩</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: linear-gradient(180deg,#16215c,#0a1128); color: #eaf2ff; min-height: 100vh; }
-  .wrap { display: flex; gap: 18px; justify-content: center; align-items: flex-start; padding: 18px 14px 26px; flex-wrap: wrap; }
-  .panel { width: 470px; max-width: 100%; background: #232946; border: 2px solid #3d4470; border-radius: 20px; padding: 16px 18px 18px; }
-  .panel h2 { font-size: 21px; margin-bottom: 8px; }
-  .panel h3 { font-size: 14px; color: #ffd43b; margin: 14px 0 6px; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0d1f; background-image: radial-gradient(1.5px 1.5px at 12% 22%, #3d4478 50%, transparent 51%), radial-gradient(1.5px 1.5px at 78% 12%, #3d4478 50%, transparent 51%), radial-gradient(1.2px 1.2px at 55% 68%, #2c3260 50%, transparent 51%), radial-gradient(1.2px 1.2px at 90% 55%, #2c3260 50%, transparent 51%); color: #e8ebff; min-height: 100vh; }
+  .wrap { display: flex; gap: 20px; justify-content: center; align-items: flex-start; padding: 20px 14px 28px; flex-wrap: wrap; }
+  .panel { width: 470px; max-width: 100%; background: linear-gradient(180deg,#151a38,#10142c); border: 1px solid #2c3568; border-radius: 18px; box-shadow: 0 12px 32px rgba(0,0,0,.45); padding: 16px 18px 18px; }
+  .panel h2 { font-size: 21px; margin-bottom: 8px; color: #c9d2ff; }
+  .panel h3 { font-size: 14px; color: #7df3ff; font-weight: 800; margin: 14px 0 6px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-  .row button { font-size: 13.5px; font-weight: 700; padding: 8px 12px; border-radius: 12px; border: 2px solid #3d4470; background: #171b31; color: #eaf2ff; cursor: pointer; }
-  .row button.main { background: #845ef7; border-color: #845ef7; font-size: 15.5px; padding: 10px 18px; flex: 1; }
-  textarea { width: 100%; height: 400px; background: #111528; color: #eaf2ff; border: 2px solid #3d4470; border-radius: 12px; padding: 10px 12px; font: 14px/1.6 Consolas, "Microsoft YaHei", monospace; resize: vertical; }
-  .report { font-size: 13.5px; line-height: 1.75; background: #171b31; border-radius: 12px; padding: 10px 12px; margin-top: 8px; min-height: 60px; }
-  .report .ok { color: #8ce99a; } .report .err { color: #ffa8a8; } .report .warn { color: #ffe066; } .report .info { color: #c5cdf0; }
-  .parts { font-size: 13px; line-height: 1.8; color: #c5cdf0; }
-  .parts b { color: #ffd43b; font-weight: 700; }
-  .parts code { background: #171b31; border-radius: 6px; padding: 1px 6px; color: #eaf2ff; font-family: inherit; }
-  .tip { color: #8b93b8; font-size: 12.5px; line-height: 1.65; margin-top: 8px; }
-  .pill { font-size: 13.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 2px solid #3d4470; background: #171b31; color: #eaf2ff; cursor: pointer; }
+  .row button { font-size: 13.5px; font-weight: 700; padding: 8px 12px; border-radius: 999px; border: 1px solid #2c3568; background: #171d42; color: #c9d2ff; cursor: pointer; }
+  .row button.main { background: linear-gradient(90deg,#0fbf8f,#37e0ff); border: none; color: #04222b; font-size: 15.5px; padding: 10px 18px; flex: 1; box-shadow: 0 6px 22px rgba(55,224,255,.35); }
+  textarea { width: 100%; height: 400px; background: #0b0f26; color: #aeb8ec; border: 1px solid #2c3568; border-radius: 12px; padding: 10px 12px; font: 14px/1.6 Consolas, "Microsoft YaHei", monospace; resize: vertical; }
+  .report { font-size: 13.5px; line-height: 1.75; background: #0b0f26; border: 1px solid #2c3568; border-radius: 12px; padding: 10px 12px; margin-top: 8px; min-height: 60px; }
+  .report .ok { color: #7dffce; } .report .err { color: #ffadbb; } .report .warn { color: #ffe066; } .report .info { color: #aeb8ec; }
+  .parts { font-size: 13px; line-height: 1.8; color: #aeb8ec; }
+  .parts b { color: #7df3ff; font-weight: 700; }
+  .parts code { background: #171d42; border: 1px solid #2c3568; border-radius: 6px; padding: 1px 6px; color: #e8ebff; font-family: inherit; }
+  .tip { color: #69719f; font-size: 12.5px; line-height: 1.65; margin-top: 8px; }
+  .pill { font-size: 13.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid #2c3568; background: #171d42; color: #c9d2ff; cursor: pointer; }
 
-  .panel label { display: block; font-size: 13px; color: #c5cdf0; margin: 8px 0 4px; }
+  .panel label { display: block; font-size: 13px; color: #8b93c4; margin: 8px 0 4px; }
   textarea.share { height: 76px; }
   textarea.sharein { height: 56px; }
-  input.share { width: 100%; background: #111528; color: #eaf2ff; border: 2px solid #3d4470; border-radius: 12px; padding: 9px 12px; font-size: 13px; }
-  .stage { text-align: center; width: 500px; max-width: 100%; }
-  h1 { font-size: 28px; letter-spacing: 2px; margin-bottom: 8px; }
+  .steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: #0b0f26; border: 1px solid #2c3568; border-radius: 12px; padding: 9px 12px; margin: 8px 0 2px; font-size: 13.5px; font-weight: 700; color: #c9d2ff; }
+  .steps .n { display: inline-block; width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background: linear-gradient(90deg,#0fbf8f,#37e0ff); color: #04222b; font-size: 12.5px; margin-right: 5px; }
+  .steps .arr { color: #37e0ff; font-weight: 800; }
+  input.share { width: 100%; background: #0b0f26; color: #e8ebff; border: 1px solid #2c3568; border-radius: 12px; padding: 9px 12px; font-size: 13px; }
+  .stage { text-align: center; width: 500px; max-width: 100%; background: linear-gradient(180deg,#151a38,#10142c); border: 1px solid #2c3568; border-radius: 18px; box-shadow: 0 12px 32px rgba(0,0,0,.45); padding: 16px 12px 18px; }
+  h1 { font-size: 28px; letter-spacing: 2px; margin-bottom: 10px; background: linear-gradient(90deg,#7df3ff,#b79bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .hud { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; flex-wrap: wrap; }
-  .hud div { background: #232946; border: 2px solid #3d4470; padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: 15px; }
-  .hud .power { background: #2b5ea7; border-color: #2b5ea7; font-size: 17px; }
-  canvas { background: linear-gradient(#131f3d, #0a1122); border: 3px solid #3d4470; border-radius: 18px; touch-action: none; box-shadow: 0 12px 34px rgba(0,0,0,.55); width: min(480px, 100%, calc((100dvh - 300px) * 0.774)); height: auto; }
-  .bar { width: 480px; max-width: 100%; height: 9px; background: #232946; border-radius: 5px; margin: 10px auto 0; overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0%; background: #51cf66; }
-  .msg { min-height: 26px; margin-top: 10px; font-size: 17px; font-weight: 800; color: #ffd43b; }
-  .sub { min-height: 20px; margin-top: 4px; font-size: 14px; color: #a9b4e0; }
-  .btn { font-size: 18px; font-weight: 800; padding: 12px 44px; border: none; border-radius: 999px; background: linear-gradient(180deg,#ff8a5c,#e8590c); color: #fff; cursor: pointer; margin-top: 10px; }
-  .ctl { margin-top: 10px; display: flex; gap: 8px; justify-content: center; }
+  .hud div { background: #0b0f26; border: 1px solid #2c3568; padding: 6px 16px; border-radius: 999px; font-weight: 700; font-size: 15px; color: #c9d2ff; }
+  .hud .power { background: rgba(55,224,255,.14); border-color: #2b6f86; color: #7df3ff; font-size: 17px; }
+  canvas { background: linear-gradient(180deg,#141b47 0%,#0e1330 68%,#0b2530 100%); border: 2px solid #37448c; border-radius: 14px; touch-action: none; box-shadow: 0 0 26px rgba(55,224,255,.16), 0 12px 30px rgba(0,0,0,.5); width: min(480px, 100%, calc((100dvh - 300px) * 0.774)); height: auto; }
+  .bar { width: 480px; max-width: 100%; height: 10px; background: #232a55; border-radius: 99px; margin: 10px auto 0; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg,#37e0ff,#7a5cff); }
+  .msg { min-height: 26px; margin-top: 10px; font-size: 17px; font-weight: 800; color: #7df3ff; }
+  .sub { min-height: 20px; margin-top: 4px; font-size: 14px; color: #69719f; }
+  .btn { font-size: 18px; font-weight: 800; padding: 12px 44px; border: none; border-radius: 12px; background: linear-gradient(90deg,#ff5470,#ff9f43); color: #fff; cursor: pointer; margin-top: 10px; box-shadow: 0 8px 26px rgba(255,84,112,.4); }
+  .ctl { margin-top: 12px; display: flex; gap: 8px; justify-content: center; }
+  .row button:active, .pill:active { transform: translateY(1px); }
+  .row button.main:active { box-shadow: 0 2px 10px rgba(55,224,255,.35); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 4px 14px rgba(255,84,112,.4); }
+  .btnrow { display: flex; gap: 10px; justify-content: center; align-items: center; }
+  .btn.ghost { background: rgba(255,255,255,.10); border: 2px solid rgba(255,255,255,.45); box-shadow: none; padding: 12px 26px; }
+  textarea:focus, input.share:focus { outline: none; border-color: #37e0ff; box-shadow: 0 0 0 3px rgba(55,224,255,.18); }
 </style>
 </head>
 <body>
@@ -51,6 +60,7 @@
       <button id="s_trap">样例：陷阱大师</button>
       <button id="s_parts">样例：零件大杂烩</button>
     </div>
+    <div class="steps"><span><span class="n">1</span>把文件粘进来</span><span class="arr">→</span><span><span class="n">2</span>点「装上我的关卡」</span><span class="arr">→</span><span><span class="n">3</span>点「开始游戏」</span></div>
     <textarea id="level" spellcheck="false"></textarea>
     <div class="row"><button class="main" id="b_build">装上我的关卡</button></div>
     <div class="report" id="report"></div>
@@ -59,8 +69,8 @@
     <div class="row"><button class="main" id="b_code" style="flex:1">生成我的关卡码</button></div>
     <label>关卡码（把这串字复制，发到聊天里给同伴）</label>
     <textarea class="share" id="shareout" readonly spellcheck="false"></textarea>
-    <div class="row"><button id="b_copycode">📋 复制关卡码</button><button id="b_copylink">📋 复制关卡链接</button></div>
-    <label>我的关卡链接（同伴点开就能玩这一关）</label>
+    <div class="row"><button id="b_copycode">📋 复制关卡码</button><button id="b_copylink">📋 复制游戏链接</button></div>
+    <label>我的游戏链接（同伴点开就能玩这一关）</label>
     <input class="share" type="text" id="linkout" readonly>
     <label>玩同伴的关卡：把他的关卡码粘在这里</label>
     <textarea class="sharein" id="sharein" spellcheck="false"></textarea>
@@ -89,7 +99,7 @@
     <div class="bar"><i id="prog"></i></div>
     <div class="msg" id="msg"></div>
     <div class="sub" id="sub"></div>
-    <button class="btn" id="btn">开始游戏</button>
+    <div class="btnrow"><button class="btn" id="btn">开始游戏</button><button class="btn ghost" id="btnEnd" style="display:none">结束游戏</button></div>
     <div class="ctl"><button class="pill" id="fxBtn">✨ 效果：开</button><button class="pill" id="sndBtn">🔊 声音：开</button></div>
   </div>
 </div>
@@ -635,34 +645,63 @@ function rr(x, y, w, h, r) {
   ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
-function drawGate(x, y, w, op, g) {
+function drawGate(x, y, w, op, g, s) {
+  s = s || 1; const gh = 46 * (0.55 + 0.45 * s);   // v7：门沿纵深轨道由远到近，越接近越高、字越大
   let fill, line, label = opLabel(op);
   if (g.item) { fill = "rgba(255,212,59,.34)"; line = "#ffd43b"; label = "🎁 " + label; }
   else if (g.hidden) { fill = "rgba(134,142,150,.34)"; line = "#ced4da"; label = "？"; }
   else if (op[0] === "+" || op[0] === "×") { fill = "rgba(132,94,247,.34)"; line = "#b197fc"; }   // 颜色只分「加人」和「扣人」，不提前告诉你哪边更好
   else { fill = "rgba(255,107,107,.30)"; line = "#ff6b6b"; }
-  ctx.fillStyle = fill; rr(x + 4, y, w - 8, 46, 10); ctx.fill();
-  ctx.strokeStyle = line; ctx.lineWidth = 2; rr(x + 4, y, w - 8, 46, 10); ctx.stroke();
-  ctx.fillStyle = "#fff"; ctx.font = "bold 25px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText(label, x + w / 2, y + 24);
+  ctx.fillStyle = "rgba(0,0,0,.28)"; rr(x + 8, y + 7, w - 8, gh, 10); ctx.fill();
+  ctx.fillStyle = fill; rr(x + 4, y, w - 8, gh, 10); ctx.fill();
+  ctx.strokeStyle = line; ctx.lineWidth = 2; rr(x + 4, y, w - 8, gh, 10); ctx.stroke();
+  ctx.fillStyle = "rgba(255,255,255,.20)"; rr(x + 10, y + 4, w - 20, 9, 5); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "bold " + Math.round(25 * (0.45 + 0.55 * s)) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(label, x + w / 2, y + gh / 2 + 1);
 }
 function draw(now) {
   const T = LV ? LV.theme : { monEmoji: "👾", bossEmoji: "👾", teamEmoji: "🤖" };
   ctx.clearRect(0, 0, W, H);
+  // ===== v6 精修：远景星云、星点、跑道纵深（纯背景，不参与任何判定）=====
+  let neb = ctx.createRadialGradient(88, 64, 4, 88, 64, 120); neb.addColorStop(0, "rgba(122,92,255,.16)"); neb.addColorStop(1, "rgba(122,92,255,0)");
+  ctx.fillStyle = neb; ctx.fillRect(0, 0, 240, 200);
+  neb = ctx.createRadialGradient(398, 44, 4, 398, 44, 110); neb.addColorStop(0, "rgba(55,224,255,.13)"); neb.addColorStop(1, "rgba(55,224,255,0)");
+  ctx.fillStyle = neb; ctx.fillRect(280, 0, 200, 180);
+  ctx.fillStyle = "#ffffff";
+  for (let i = 0; i < 26; i++) { const sx = (i * 173.3) % W, sy = (i * 97.7) % 300; ctx.globalAlpha = 0.10 + (i % 4) * 0.06; ctx.fillRect(sx, sy, 2, 2); }
+  ctx.globalAlpha = 1;
+  const railL = y => { const t = Math.max(0, Math.min(1, y / H)); return (W / 2 - 125) + (16 - (W / 2 - 125)) * t; };
+  const railR = y => { const t = Math.max(0, Math.min(1, y / H)); return (W / 2 + 125) + (W - 16 - (W / 2 + 125)) * t; };
+  ctx.strokeStyle = "rgba(125,243,255,.13)"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(W / 2 - 125, 0); ctx.lineTo(16, H); ctx.moveTo(W / 2 + 125, 0); ctx.lineTo(W - 16, H); ctx.stroke();
+  const off = (now * 0.10) % 150;
+  for (let kL = 0; kL < 5; kL++) {
+    const yy = kL * 150 + off - 150; if (yy < 6) continue;
+    const tt = yy / H, xl = railL(yy), xr = railR(yy);
+    ctx.strokeStyle = "rgba(125,243,255," + (0.04 + tt * 0.09).toFixed(3) + ")"; ctx.lineWidth = 1 + tt * 2;
+    ctx.beginPath(); ctx.moveTo(xl, yy); ctx.lineTo(xr, yy); ctx.stroke();
+  }
+  // 下一道门：你所在那一侧的地面亮一圈（只是提示位置，不改变任何规则）
+  let nextG = null;
+  for (const g of gates) if (!g.item && g.y < PLAYER_Y && (!nextG || g.y > nextG.y)) nextG = g;
+  if (nextG) { const nxl = railL(nextG.y + 23), nsp = railR(nextG.y + 23) - nxl, gx = nxl + nsp * (px < W / 2 ? 0.25 : 0.75); ctx.fillStyle = "rgba(55,224,255,.16)"; ctx.beginPath(); ctx.ellipse(gx, nextG.y + 62, nsp * 0.14, 9, 0, 0, 6.3); ctx.fill(); }
   ctx.fillStyle = "rgba(255,255,255,.05)"; ctx.fillRect(W / 2 - 1, 0, 2, H);
   ctx.fillStyle = "rgba(255,255,255,.30)"; ctx.font = "19px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   ctx.fillText("左半场", W / 4, 28); ctx.fillText("右半场", W * 3 / 4, 28);
   for (const g of gates) {
-    if (g.item) { drawGate(0, g.y, W, g.left, g); continue; }
-    const k = g.swapped ? Math.min(1, (now - g.swapT) / 220) : 1;      // 换位时两扇门滑过去
-    drawGate((1 - k) * W / 2, g.y, W / 2, g.left, g); drawGate(W / 2 - (1 - k) * W / 2, g.y, W / 2, g.right, g);
+    const gxl = railL(g.y + 23), gsp = railR(g.y + 23) - gxl, gs = gsp / (W - 32);   // 门的横向位置与宽度由它在轨道上的位置决定
+    if (g.item) { drawGate(gxl, g.y, gsp, g.left, g, gs); continue; }
+    const k = g.swapped ? Math.min(1, (now - g.swapT) / 220) : 1;      // 换位时两扇门在当前轨道宽度里滑过去
+    drawGate(gxl + (1 - k) * gsp / 2, g.y, gsp / 2, g.left, g, gs); drawGate(gxl + k * gsp / 2, g.y, gsp / 2, g.right, g, gs);
     if (g.swap && !g.swapped) {
-      ctx.fillStyle = "#ffd43b"; ctx.beginPath(); ctx.arc(W / 2, g.y + 23, 17, 0, 6.3); ctx.fill();
-      ctx.fillStyle = "#212529"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⇄", W / 2, g.y + 24);
+      const gy = g.y + Math.round(23 * (0.55 + 0.45 * gs));
+      ctx.fillStyle = "#ffd43b"; ctx.beginPath(); ctx.arc(W / 2, gy, 17, 0, 6.3); ctx.fill();
+      ctx.fillStyle = "#212529"; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("⇄", W / 2, gy + 1);
     }
   }
   for (const e of enemies) {
     const k = (fxOn && e.sq > 0) ? Math.max(0, e.sq / 0.10) : 0;
+    ctx.fillStyle = "rgba(0,0,0,.30)"; ctx.beginPath(); ctx.ellipse(e.x, e.y + e.h / 2 + 3, e.w * 0.42, 7, 0, 0, 6.3); ctx.fill();
     ctx.save();
     ctx.translate(e.x, e.y); ctx.scale(1 + 0.26 * k, 1 - 0.26 * k);
     if (e.dashing) { ctx.fillStyle = "rgba(255,169,77,.35)"; for (let i = 1; i <= 3; i++) rr(-e.w / 2 + 6, -e.h / 2 - i * 13, e.w - 12, 8, 4), ctx.fill(); }
@@ -686,9 +725,14 @@ function draw(now) {
   ctx.fillStyle = "#66d9e8";
   for (const b of bullets) ctx.fillRect(b.x - 2, b.y - 9, 4, 13);
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillStyle = "rgba(0,0,0,.30)"; ctx.beginPath(); ctx.ellipse(px, PLAYER_Y + 48, 56, 9, 0, 0, 6.3); ctx.fill();
   const mates = Math.min(4, Math.floor(power / 8));
+  // v9：小队垫圆形底衬＋描边，emoji 不再裸浮在深色背景上发虚；怪是方块、队是圆，区分敌我
+  const disc = (x, y, r) => { ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, 6.3); ctx.fillStyle = "rgba(55,224,255,.20)"; ctx.fill(); ctx.strokeStyle = "rgba(125,243,255,.9)"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); };
+  ctx.fillStyle = "#ffffff";
   ctx.font = "26px serif";
-  for (let i = 0; i < mates; i++) ctx.fillText(T.teamEmoji, px + (i - (mates - 1) / 2) * 30, PLAYER_Y + 30);
+  for (let i = 0; i < mates; i++) { const mx = px + (i - (mates - 1) / 2) * 30; disc(mx, PLAYER_Y + 30, 16); ctx.fillText(T.teamEmoji, mx, PLAYER_Y + 30); }
+  disc(px, PLAYER_Y, 27);
   ctx.font = "42px serif"; ctx.fillText(T.teamEmoji, px, PLAYER_Y);
   const label = fmt(power);
   ctx.font = "bold 20px sans-serif";
@@ -709,6 +753,7 @@ function finish(win) {
   const u = stat.used, worst = u.length ? Math.round(Math.max.apply(null, u) * 100) : 0, avg = u.length ? Math.round(u.reduce((a, b) => a + b, 0) / u.length * 100) : 0;
   $("sub").textContent = "门选对 " + stat.right + " / " + stat.gates + "，漏怪 " + stat.leaks + " 只，打掉的怪平均走了 " + avg + "% 的路，最险的一只走了 " + worst + "%";
   $("btn").textContent = "再来一局";
+  $("btnEnd").style.display = "none";
 }
 
 // ===== 装配 =====
@@ -744,7 +789,7 @@ function assembleNow() {
     }
   }
   $("report").innerHTML = html;
-  $("sub").textContent = ""; $("btn").textContent = "开始游戏";
+  $("sub").textContent = ""; $("btn").textContent = "开始游戏"; $("btnEnd").style.display = "none";
   power = 3; enemies = []; gates = []; bullets = []; floats = []; particles = []; px = W / 2; $("power").textContent = "3"; $("kills").textContent = "0"; $("time").textContent = "0"; $("prog").style.width = "0%";
   draw(0);
 }
@@ -756,10 +801,22 @@ function startGame() {
   resetGame(LV, Math.random, performance.now());
   $("power").textContent = "3"; $("kills").textContent = "0"; $("time").textContent = "0"; $("msg").textContent = ""; $("sub").textContent = "";
   $("btn").textContent = "重新开始";
+  $("btnEnd").style.display = "";
   initAudio(); running = true;
   raf = requestAnimationFrame(loop);
 }
 $("btn").onclick = startGame;
+function endGame() {
+  stopGame();
+  power = 3; enemies = []; gates = []; bullets = []; floats = []; particles = []; px = W / 2;
+  $("power").textContent = "3"; $("kills").textContent = "0"; $("time").textContent = "0"; $("prog").style.width = "0%";
+  $("msg").textContent = "已结束，想再玩点「开始游戏」";
+  $("sub").textContent = "";
+  $("btn").textContent = "开始游戏";
+  $("btnEnd").style.display = "none";
+  draw(0);
+}
+$("btnEnd").onclick = endGame;
 function move(clientX) { const r = cv.getBoundingClientRect(); targetX = Math.max(30, Math.min(W - 30, (clientX - r.left) * (W / r.width))); }
 cv.addEventListener("pointermove", e => move(e.clientX));
 cv.addEventListener("pointerdown", e => move(e.clientX));
@@ -894,14 +951,26 @@ loadSample("base");
 assembleNow();
 
 
-// ===== 分享：关卡码 / 关卡链接（词表版：主题就在文件里，码里只装文件全文）=====
+// ===== 分享：关卡码 / 游戏链接（词表版：主题就在文件里，码里只装文件全文）=====
+function codeChecksum(b64) {
+  let h = 0; for (let i = 0; i < b64.length; i++) h = (h * 31 + b64.charCodeAt(i)) >>> 0;
+  return ("000" + (h % 1679616).toString(36)).slice(-4);
+}
 function encodeLevelText(text) {
   const bytes = new TextEncoder().encode(text);
   let bin = ""; for (let i = 0; i < bytes.length; i += 8192) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
-  return btoa(bin);
+  const b64 = btoa(bin);
+  return b64 + "." + codeChecksum(b64);
 }
 function decodeLevelText(code) {
-  const bin = atob(String(code).trim());
+  let s = String(code).trim();
+  const dot = s.lastIndexOf(".");
+  if (dot > 0) {
+    const b64 = s.slice(0, dot);
+    if (codeChecksum(b64) !== s.slice(dot + 1)) throw new Error("checksum");
+    s = b64;
+  }
+  const bin = atob(s);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return new TextDecoder().decode(bytes);
@@ -922,19 +991,26 @@ $("b_code").onclick = () => {
 $("b_copycode").onclick = e => copyField("shareout", e.currentTarget);
 $("b_copylink").onclick = e => copyField("linkout", e.currentTarget);
 $("b_import").onclick = () => {
+  // v9：先在内存里解码＋验证，成功才动 #level；关卡码只能从装配成功的关卡生成，装不上必是码没复制完整
+  const fail = () => {
+    $("report").innerHTML = '<div class="err"><b>关卡码没有复制完整</b></div><div class="err">让同伴点【复制关卡码】按钮重新发一次，不要用手拖着选。</div>' + $("report").innerHTML;
+    $("msg").textContent = "关卡码没有复制完整，让同伴重新发一次";
+  };
+  let text;
   try {
-    const prevText = $("level").value;
-    const text = decodeLevelText($("sharein").value);
-    $("level").value = text;
-    assembleNow();
-    if (LV) {
-      $("msg").textContent = "同伴的关卡装好啦，点开始游戏试试";
-      const titleLine = (text.split("\n").find(l => l.trim().startsWith("标题")) || "").trim();
-      $("report").innerHTML = '<div class="ok">📥 同伴的关卡装好啦' + (titleLine ? "：" + esc(titleLine) : "") + (prevText.trim() === text.trim() ? "（和你刚才那关是同一关）" : "") + '。点右边橙色的「开始游戏」就能玩。</div>' + $("report").innerHTML;
-      const stage = $("btn").closest(".stage");
-      if (stage && stage.scrollIntoView) setTimeout(() => stage.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
-    }
-  } catch (e) { $("msg").textContent = "这个关卡码读不出来，检查一下是不是没复制全"; }
+    text = decodeLevelText($("sharein").value);
+    if (buildLevel(parseLevel(text)).errors.length) { fail(); return; }
+  } catch (e) { fail(); return; }
+  const prevText = $("level").value;
+  $("level").value = text;
+  assembleNow();
+  if (LV) {
+    $("msg").textContent = "同伴的关卡装好啦，点开始游戏试试";
+    const titleLine = (text.split("\n").find(l => l.trim().startsWith("标题")) || "").trim();
+    $("report").innerHTML = '<div class="ok">📥 同伴的关卡装好啦' + (titleLine ? "：" + esc(titleLine) : "") + (prevText.trim() === text.trim() ? "（和你刚才那关是同一关）" : "") + '。点右边橙色的「开始游戏」就能玩。</div>' + $("report").innerHTML;
+    const stage = $("btn").closest(".stage");
+    if (stage && stage.scrollIntoView) setTimeout(() => stage.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+  }
 };
 // 打开分享链接（#lv=关卡码）时，直接装上那一关
 let sharedImported = false;
